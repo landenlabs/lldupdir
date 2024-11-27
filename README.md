@@ -1,96 +1,65 @@
-#lldupdir
-OSX / Linux / DOS  Json conversion of arrays to transposed columns in CSV format. 
+lldupdir
+### OSX / Linux / DOS  Find duplicate files and optionally delete or hardlink them.
 
-LLJson parses json files and outputs them as a transposed set of CSV columns. 
+Nov-2024
 
-This input json file:
 
-<pre>
-{
-  "quiz": {
-    "sport": {
-      "q1": {
-        "question": "Which one is correct team name in NBA?",
-        "options": [
-          "New York Bulls",
-          "Los Angeles Kings",
-          "Golden State Warriros",
-          "Huston Rocket"
-        ],
-        "answer": "Huston Rocket"
-      }
-    },
-    "maths": {
-      "q1": {
-        "question": "5 + 7 = ?",
-        "options": [
-          "10",
-          "11",
-          "12",
-          "13"
-        ],
-        "answer": "12"
-      },
-      "q2": {
-        "question": "12 - 8 = ?",
-        "options": [
-          "1",
-          "2",
-          "3",
-          "4"
-        ],
-        "answer": "4"
-      }
-    }
-  }
-}
-</pre>
+### TODO - add notes and examples here
 
-Is converted to CSV columns as:
-<pre>
-quiz.maths.q1.options, quiz.maths.q2.options, quiz.sport.q1.options
-"10", "1", "New York Bulls"
-"11", "2", "Los Angeles Kings"
-"12", "3", "Golden State Warriros"
-</pre>
+### NOTE - hardlink feature not yet implemented  (Nov-2024)
 
+<hr>
 Visit home website
 
 [http://landenlabs.com](http://landenlabs.com)
 
 
+<hr>
 Help Banner:
 <pre>
-lldupdir  Dennis Lang v1.1 (landenlabs.com) Dec 20 2019
+lldupdir  Dennis Lang v2.1 (landenlabs.com) Nov 25 2024
 
-Des: Json parse and output as transposed CSV
+Des: 'Find duplicate files
 Use: lldupdir [options] directories...   or  files
 
- Options (only first unique characters required, options can be repeated):
-   -includefile=&lt;filePattern>
-   -excludefile=&lt;filePattern>
+Options (only first unique characters required, options can be repeated):
+
+
+   -includeFile=<filePattern>   ; -inc=*.java
+   -excludeFile=<filePattern>   ; -exc=*.bat -exe=*.exe
+   Note: Capitalized Include/Exclude for full path pattern
+   -IncludePath=<pathPattern>   ; -Inc=*/code/*.java
+   -ExcludePath=<pathPattern>   ; -Exc=*/bin/* -Exe=*/build/*
    -verbose
 
- Example:
-   lldupdir -inc=*.json -ex=foo.json -ex=bar.json dir1/subdir dir2 file1.json file2.json
- Example input json:
-   {
-      "cloudCover": [
-        10,
-        30,
-        49
-      ],
-        "dayOfWeek": [
-        "Monday",
-        "Tuesday",
-        "Wednesday"
-      ]
-   }
+Options:
+   -showDiff           ; Show files that differ
+   -showMiss           ; Show missing files
+   -sameAll            ; Compare all files for matching hash
+   -hideDup            ; Don't show duplicate files
+   -justName           ; Match duplicate name only, not contents
+   -preDup=<text>      ; Prefix before duplicates, default nothing
+   -preDiff=<text>     ; Prefix before diffences, default: "!= "
+   -preMiss=<text>     ; Prefix before missing, default: "--  "
+   -postDivider=<text> ; Divider for dup and diff, def: "__\n"
+   -separator=<text>   ; Separator
 
-   Output transposed CSV
-    cloudCover,  dayOfWeek
-     10, Monday
-     30, Tuesday
-     49, WednesDay
+Options (only when scanning two directories) :
+   -simple             ; Only files no pre or separators
+   -log=[1|2]          ; Only show 1st or 2nd file for Dup or Diff
+   -delete=[1|2]       ; If dup, delete file from directory 1 or 2
 
+Examples:
+  Find file matches by name and hash value (fastest with only 2 dirs)
+   lldupdir  dir1 dir2/subdir
+   lldupdir  -showMiss -showDiff dir1 dir2/subdir
+   lldupdir  -hideDup -showMiss -showDiff dir1 dir2/subdir
+   lldupdir -Exc=*bin* -exc=*.exe -hideDup -showMiss   dir1 dir2/subdir
+
+  Find file matches by matching hash value, slower than above, 1 or three or more dirs
+   lldupdir  -showAll  dir1
+   lldupdir  -showAll  dir1   dir2/subdir   dir3
+
+  Change how output appears
+   lldupdir  -sep=" /  "  dir1 dir2/subdir dir3
 </pre>

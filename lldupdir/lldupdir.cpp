@@ -196,7 +196,10 @@ int main(int argc, char* argv[]) {
                     switch (*cmdName) {
                      case 'd':   // delete=None|First|Second|Both
                         if (parser.validOption("deleteFile", cmdName)) {
-                            Command::getFileTypes(commandPtr->deleteFiles, value);
+                            if (!Command::getFileTypes(commandPtr->deleteFiles, value)) {
+                                parser.showUnknown(argStr);
+                                std::cerr << "Valid delete types are: first, second or both\n";
+                            }
                         }
                         break;
                     case 'e':   // -excludeFile=<pat>
@@ -213,7 +216,10 @@ int main(int argc, char* argv[]) {
                         break;
                     case 'l':   // log=First|Second   def=Both
                         if (parser.validOption("log", cmd + 1)) {
-                            Command::getFileTypes(commandPtr->showFiles, value);
+                            if (!Command::getFileTypes(commandPtr->showFiles, value)) {
+                                parser.showUnknown(argStr);
+                                std::cerr << "Valid log types are: first, second or both\n";
+                            }
                         }
                         break;
                     case 'p':

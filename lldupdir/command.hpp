@@ -67,7 +67,7 @@ public:
     PatternList excludeFilePatList;
     PatternList includePathPatList;
     PatternList excludePathPatList;
-    lstring DECRYPT_KEY;
+  
 
     bool showFile = false;
     bool verbose = false;
@@ -125,7 +125,6 @@ public:
     Command& share(const Command& other) {
         includeFilePatList = other.includeFilePatList;
         excludeFilePatList = other.excludeFilePatList;
-        DECRYPT_KEY = other.DECRYPT_KEY;
         showFile = other.showFile;
         verbose = other.verbose;
         invert = other.invert;

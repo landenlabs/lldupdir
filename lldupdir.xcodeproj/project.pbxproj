@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9AB236B42CF8D033007446E8 /* parseutil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9AB236B32CF8D033007446E8 /* parseutil.cpp */; };
 		9ABB64C12CB36E540060FD55 /* hash.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9ABB64BD2CB36E540060FD55 /* hash.cpp */; };
 		9ABB64C22CB36E540060FD55 /* command.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9ABB64B92CB36E540060FD55 /* command.cpp */; };
 		9ABB64C32CB36E540060FD55 /* md5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9ABB64BF2CB36E540060FD55 /* md5.cpp */; };
@@ -28,7 +29,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		9ABB64B72CB36E540060FD55 /* colors.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = colors.hpp; sourceTree = "<group>"; };
+		9AB236B22CF8D033007446E8 /* parseutil.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = parseutil.hpp; sourceTree = "<group>"; };
+		9AB236B32CF8D033007446E8 /* parseutil.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = parseutil.cpp; sourceTree = "<group>"; };
 		9ABB64B82CB36E540060FD55 /* command.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = command.hpp; sourceTree = "<group>"; };
 		9ABB64B92CB36E540060FD55 /* command.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = command.cpp; sourceTree = "<group>"; };
 		9ABB64BA2CB36E540060FD55 /* dupscan.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = dupscan.hpp; sourceTree = "<group>"; };
@@ -38,13 +40,12 @@
 		9ABB64BE2CB36E540060FD55 /* md5.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = md5.hpp; sourceTree = "<group>"; };
 		9ABB64BF2CB36E540060FD55 /* md5.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = md5.cpp; sourceTree = "<group>"; };
 		9ABB64C02CB36E540060FD55 /* xxhash64.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = xxhash64.hpp; sourceTree = "<group>"; };
-		B9B44DBD1D8F65CD00782398 /* lldupdir */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = lldupdir; sourceTree = BUILT_PRODUCTS_DIR; };
+		B9B44DBD1D8F65CD00782398 /* lldupdir */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = lldupdir; path = "/Users/dennislang/opt/projects/projects-xcode/_ll/lldupdir/build/Debug/lldupdir"; sourceTree = "<absolute>"; };
 		B9B44DCA1D8F661700782398 /* directory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = directory.cpp; sourceTree = "<group>"; };
 		B9B44DCB1D8F661700782398 /* directory.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = directory.hpp; sourceTree = "<group>"; };
 		B9B44DCE1D8F661700782398 /* lldupdir.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lldupdir.cpp; sourceTree = "<group>"; };
 		B9B44DD11D8F661700782398 /* ll_stdhdr.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ll_stdhdr.hpp; sourceTree = "<group>"; };
 		B9B44DD21D8F661700782398 /* lstring.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = lstring.hpp; sourceTree = "<group>"; };
-		B9B44DD31D8F661700782398 /* split.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = split.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,22 +63,14 @@
 			isa = PBXGroup;
 			children = (
 				B9B44DBF1D8F65CD00782398 /* lldupdir */,
-				B9B44DBE1D8F65CD00782398 /* Products */,
 			);
-			sourceTree = "<group>";
-		};
-		B9B44DBE1D8F65CD00782398 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				B9B44DBD1D8F65CD00782398 /* lldupdir */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 		B9B44DBF1D8F65CD00782398 /* lldupdir */ = {
 			isa = PBXGroup;
 			children = (
-				9ABB64B72CB36E540060FD55 /* colors.hpp */,
+				9AB236B22CF8D033007446E8 /* parseutil.hpp */,
+				9AB236B32CF8D033007446E8 /* parseutil.cpp */,
 				9ABB64B82CB36E540060FD55 /* command.hpp */,
 				9ABB64B92CB36E540060FD55 /* command.cpp */,
 				9ABB64BA2CB36E540060FD55 /* dupscan.hpp */,
@@ -92,7 +85,6 @@
 				B9B44DCE1D8F661700782398 /* lldupdir.cpp */,
 				B9B44DD11D8F661700782398 /* ll_stdhdr.hpp */,
 				B9B44DD21D8F661700782398 /* lstring.hpp */,
-				B9B44DD31D8F661700782398 /* split.hpp */,
 			);
 			path = lldupdir;
 			sourceTree = "<group>";
@@ -140,7 +132,7 @@
 				en,
 			);
 			mainGroup = B9B44DB41D8F65CD00782398;
-			productRefGroup = B9B44DBE1D8F65CD00782398 /* Products */;
+			productRefGroup = B9B44DB41D8F65CD00782398;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -158,6 +150,7 @@
 				9ABB64C12CB36E540060FD55 /* hash.cpp in Sources */,
 				9ABB64C22CB36E540060FD55 /* command.cpp in Sources */,
 				9ABB64C32CB36E540060FD55 /* md5.cpp in Sources */,
+				9AB236B42CF8D033007446E8 /* parseutil.cpp in Sources */,
 				9ABB64C42CB36E540060FD55 /* dupscan.cpp in Sources */,
 				B9B44DD71D8F661700782398 /* directory.cpp in Sources */,
 			);

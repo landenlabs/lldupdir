@@ -50,7 +50,7 @@
 #pragma once
 
 #include "ll_stdhdr.hpp"
-
+#include "lstring.hpp"
 
 #ifdef HAVE_WIN
     #include <windows.h>
@@ -134,7 +134,7 @@ public:
     static lstring& getDir(lstring& outName, const lstring& inPath);
     static lstring& getName(lstring& outName, const lstring& inPath);
     static lstring& getExt(lstring& outExt, const lstring& inPath);
-    static bool deleteFile(const char* inPath);
+    static bool deleteFile(bool dryRun, const char* inPath);
     static bool setPermission(const char* inPath, unsigned permission, bool setAllParts = false);
 
 private:

@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\lldupdir\commands.cpp" />
+    <ClCompile Include="..\lldupdir\command.cpp" />
     <ClCompile Include="..\lldupdir\directory.cpp" />
     <ClCompile Include="..\lldupdir\dupscan.cpp" />
     <ClCompile Include="..\lldupdir\hash.cpp" />
@@ -28,7 +28,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\lldupdir\colors.hpp" />
-    <ClInclude Include="..\lldupdir\commands.hpp" />
+    <ClInclude Include="..\lldupdir\command.hpp" />
     <ClInclude Include="..\lldupdir\directory.hpp" />
     <ClInclude Include="..\lldupdir\dupscan.hpp" />
     <ClInclude Include="..\lldupdir\hash.hpp" />

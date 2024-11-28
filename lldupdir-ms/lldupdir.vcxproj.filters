@@ -21,7 +21,7 @@
     <ClCompile Include="..\lldupdir\lldupdir.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\lldupdir\commands.cpp">
+    <ClCompile Include="..\lldupdir\command.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\lldupdir\dupscan.cpp">
@@ -47,7 +47,7 @@
     <ClInclude Include="..\lldupdir\split.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\lldupdir\commands.hpp">
+    <ClInclude Include="..\lldupdir\command.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\lldupdir\md5.hpp">

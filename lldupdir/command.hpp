@@ -84,14 +84,15 @@ public:
     bool showDiff = false;
     bool showMiss = false;
 
-    unsigned quiet = 0;         // 0=show output, 1=don't show dup/diff/miss, 2=suppress all output
-    unsigned logfile = 0;       // 0=default show both, else only show file 1 or 2
-    unsigned deletefile = 0;    // 0=no delete, else if dup, delete file 1 or 2
+    unsigned quiet = 0;             // 0=show output, 1=don't show dup/diff/miss, 2=suppress all output
+    enum FileTypes { None, First, Second, Both };
+    FileTypes showFiles = Both;
+    FileTypes deleteFiles= None;
     
     unsigned sameCnt = 0;
     unsigned diffCnt = 0;
     unsigned missCnt = 0;
-    unsigned skipCnt = 0;       // exludue and include filters rejected file.
+    unsigned skipCnt = 0;       // exclude and include filters rejected file.
 
     lstring separator = ", ";
     lstring preDivider = "";
@@ -137,24 +138,12 @@ public:
         return *this;
     }
 
-    /*
-    typedef size_t(*InspectFileFunc)(Command& command, const lstring& dirname);
-    InspectFileFunc inspectFileFunc;
-
-    size_t InspectFile(const lstring& dirName) {
-        return (*inspectFileFunc)(*this, dirName, CmdState::run);
-    }
-    */
+    static bool getFileTypes(FileTypes& fileTypes, const char *str);
 
 };
+
 
 // ---------------------------------------------------------------------------
-class DupDecode : public Command {
-public:
-
-    DupDecode() : Command('d') {}
-    virtual size_t add(const lstring& file);
-};
 
 class DupFiles : public Command {
 public:
@@ -164,13 +153,5 @@ public:
     virtual bool end();
 
     void printPaths(const IntList& pathListIdx, const std::string& name);
-};
-
-class CompareAxxPair : public Command {
-    lstring ref1Path, ref2Path;
-public:
-    CompareAxxPair() : Command('c') {}
-    virtual  bool begin(StringList& fileDirList);
-    virtual size_t add(const lstring& file);
 };
 

@@ -41,15 +41,13 @@
 #include <vector>
 
 #include "ll_stdhdr.hpp"
-#include "commands.hpp"
+#include "command.hpp"
 #include "directory.hpp"
 #include "md5.hpp"
 #include "xxhash64.hpp"
 
 
 const char EXTN_CHAR('.');
-const lstring DECRYPT_EXE = "C:\\Program Files\\Axantum\\AxCrypt\\AxCrypt.exe";
-const lstring AXX = ".axx";
 const lstring EMPTY = "";
 
 // ---------------------------------------------------------------------------
@@ -64,52 +62,7 @@ inline const string quote(const string& str) {
 }
 
 
-
-// ---------------------------------------------------------------------------
-class Decrypt {
-public:
-    const lstring cmd;
-    lstring path;
-    lstring extn;
-    lstring outFile;
-    struct stat pathStat;
-    struct stat outStat;
-
-    Decrypt(const lstring& CMD) : cmd(CMD) {}
-
-    bool decryptFile(const lstring& fullname, const lstring& outPrefix);
-};
-
-// ---------------------------------------------------------------------------
-bool Decrypt::decryptFile(const lstring& fullname, const lstring& outPrefix) {
-
-    path = lstring(fullname);
-    ReplaceAll(path, AXX, EMPTY);
-    size_t pos = path.find_last_of("-");
-    if (pos + 3 <= path.length()) {
-        path[pos] = '.';
-        extn = path + pos;
-        int statErr = stat(fullname, &pathStat);
-
-        if (statErr == 0) {
-            outFile = outPrefix + extn;
-            lstring fullCmd = cmd + quote(outFile) + " " + quote(fullname);
-            DWORD exitCode = 0;
-
-            deleteFile(outFile);
-            if (RunCommand(fullCmd, &exitCode, 2000)) {
-                if (exitCode == 0) {
-                    int statErr = stat(outFile, &outStat);
-                    return (statErr == 0);
-                }
-            }
-        }
-    }
-    return false;
-}
-
-#if defined(_WIN32) || defined(_WIN64)
-
+#ifdef HAVE_WIN
 
 // ---------------------------------------------------------------------------
 std::string GetErrorMsg(DWORD error) {
@@ -322,7 +275,7 @@ static struct stat  print(const lstring& path, struct stat* pInfo) {
     if (result == 0) {
         // err = ctime_s(timeBuf, sizeof(timeBuf), &pInfo->st_mtime);
         struct tm TM;
-#if defined(_WIN32) || defined(_WIN64)
+#ifdef HAVE_WIN
         err = localtime_s(&TM, &pInfo->st_mtime);
 #else
         TM = *localtime(&pInfo->st_mtime);
@@ -331,7 +284,7 @@ static struct stat  print(const lstring& path, struct stat* pInfo) {
         if (err) {
             std::cerr << "Invalid file " << path << std::endl;
         } else {
-#if defined(_WIN32) || defined(_WIN64)
+#ifdef HAVE_WIN
             bool isSymLink = false;
 #else
             bool isSymLink = S_ISLNK(pInfo->st_flags);
@@ -352,7 +305,7 @@ static struct stat  print(const lstring& path, struct stat* pInfo) {
 // ---------------------------------------------------------------------------
 bool deleteFile(const char* path) {
 
-#if defined(_WIN32) || defined(_WIN64)
+#ifdef HAVE_WIN
     SetFileAttributes(path, FILE_ATTRIBUTE_NORMAL);
     if (0 == DeleteFile(path)) {
         DWORD err = GetLastError();
@@ -380,161 +333,6 @@ bool Command::validFile(const lstring& name, const lstring& fullname)  {
     return isValid;
 }
 
-// ---------------------------------------------------------------------------
-// Locate matching files which are not in exclude list.
-// Locate pair of files one encrypt with AXX and the native file
-//  foo-xls.axx and foo.xls
-//  Decrypt the axx and compare to native.
-size_t DupDecode::add(const lstring& fullname) {
-    size_t fileCount = 0;
-    lstring name;
-    getName(name, fullname);
-
-    if (validFile(name, fullname)) {
-        const lstring DECRYPT_CMD = quote(DECRYPT_EXE) + " -f -c -k " + quote(DECRYPT_KEY) + " -d -n ";
-        const lstring OUTFILE = "d:\\out";
-
-        if (name.find(AXX) != lstring::npos) {   //  chry-towncountry-2007-xlsx.axx
-            lstring dup1 = fullname;
-            lstring dup2 = lstring(fullname);
-            ReplaceAll(dup2, AXX, EMPTY);
-            size_t pos = dup2.find_last_of("-");
-            if (pos + 3 <= dup2.length()) {
-                dup2[pos] = '.';
-                lstring extn = dup2 + pos;
-
-                struct stat info1;
-                struct stat info2;
-
-                int result1 = stat(dup1.c_str(), &info1);
-                int result2 = stat(dup2.c_str(), &info2);
-
-                if (result1 == 0 && result2 == 0) {
-                    print(dup1, &info1);
-                    print(dup2, &info2);
-
-                    lstring outFile = OUTFILE + extn;
-                    lstring decrypCmd = DECRYPT_CMD + outFile + " " + quote(dup1);
-                    DWORD exitCode = 0;
-
-                    deleteFile(outFile);
-                    if (RunCommand(decrypCmd, &exitCode, 2000)) {
-                        if (exitCode == 0) {
-                            struct stat info3 = print(outFile, NULL);
-                            if (info3.st_size == info2.st_size) {
-                                lstring compare = "D:\\opt\\bin\\cmp.exe -q ";
-                                lstring cmpCmd = compare + quote(dup2) + " " + quote(outFile);
-                                if (RunCommand(cmpCmd, &exitCode, 2000)) {
-                                    if (exitCode == 0) {
-                                        std::cout << "  Identical\n";
-                                        std::cout << "lr -f " << quote(dup2) << std::endl;
-                                    }
-                                } else {
-                                    std::cout << "Compare execute failed " << exitCode << std::endl;
-                                }
-                            }
-                        } else {
-                            std::cout << decrypCmd << " ExitCode=" << exitCode << std::endl;
-                        }
-                    }
-                    std::cout << std::endl;
-                }
-            }
-        }
-
-        fileCount++;
-        if (showFile)
-            std::cout << fullname.c_str() << std::endl;
-
-    }
-
-    return fileCount;
-}
-
-
-// ---------------------------------------------------------------------------
-bool CompareAxxPair::begin(StringList& fileDirList) {
-    // Clean list - remove comma separator
-    for (lstring& str : fileDirList) {
-        ReplaceAll(str, ",", "");
-    }
-
-    if (fileDirList.size() == 2) {
-        ref1Path = fileDirList.front();
-        ref2Path = fileDirList.back();
-        fileDirList.pop_back();
-        return true;
-    }
-    std::cerr << "Must provide two files or two directories to compare" << std::endl;
-    return false;
-}
-
-// ---------------------------------------------------------------------------
-// Locate matching files which are not in exclude list.
-// Locate matching pair into directory trees
-// Decrypt and compare
-//   path1/foo-xls.axx  path2/foo-xls.axx
-size_t CompareAxxPair::add(const lstring& fullname) {
-    size_t fileCount = 0;
-    lstring name;
-    getName(name, fullname);
-
-    if (validFile(name, fullname)) {
-        const lstring DECRYPT_CMD = quote(DECRYPT_EXE) + " -f -c -k " + quote(DECRYPT_KEY) + " -d -n ";
-        const lstring OUTFILE1 = "d:\\out1";
-        const lstring OUTFILE2 = "d:\\out2";
-        // const lstring COPY_CMD = "cmd /c copy /y ";
-        const lstring COPY_CMD = "d:\\opt\\bin\\lc -vfO ";
-        Decrypt decrypt1(DECRYPT_CMD);
-        Decrypt decrypt2(DECRYPT_CMD);
-
-        if (name.find(AXX) != lstring::npos) {   //  chry-towncountry-2007-xlsx.axx
-            if (decrypt1.decryptFile(fullname, OUTFILE1)) {
-                lstring file2 = fullname;
-                ReplaceAll(file2, ref1Path, ref2Path);
-                if (decrypt2.decryptFile(file2, OUTFILE2)) {
-                    fileCount++;
-                    print(decrypt1.path, &decrypt1.outStat);
-                    print(decrypt2.path, &decrypt2.outStat);
-
-                    lstring compare = "D:\\opt\\bin\\cmp.exe -q ";
-                    lstring cmpCmd = compare + quote(decrypt1.outFile) + " " + quote(decrypt2.outFile);
-                    DWORD exitCode = 0;
-                    if (RunCommand(cmpCmd, &exitCode, 2000)) {
-                        if (exitCode == 0) {
-                            std::cout << "  Identical\n";
-                            if (true) {
-                                // std::cout << "lr -f " << quote(decrypt2.path) << std::endl;
-                                lstring copyCmd = COPY_CMD + quote(fullname) + " " + quote(file2);
-                                std::cout << copyCmd << std::endl;
-                                if (RunCommand(copyCmd, &exitCode, 2000)) {
-                                } else {
-                                    std::cerr << "Copy execute failed " << exitCode << std::endl;
-                                }
-                            }
-                        }
-                    } else {
-                        if (exitCode <= 10)
-                            std::cout << "Compare execute failed " << exitCode << std::endl;
-                        else
-                            std::cout << "Compare execute failed " << exitCode
-                                << " " << GetErrorMsg(exitCode) << std::endl;
-
-                    }
-                }
-            }
-        }
-
-        if (showFile)
-            std::cout << fullname.c_str() << std::endl;
-    }
-
-    return fileCount;
-}
-
-
-
-// map<std::string name, vector<int> path>
 
 map<std::string, IntList> fileList;
 std::vector<std::string> pathList;
@@ -760,4 +558,25 @@ bool DupFiles::end() {
         }
     }
     return true;
+}
+
+//-------------------------------------------------------------------------------------------------
+// [static] parse FileTypes from string
+bool Command::getFileTypes(Command::FileTypes &fileTypes, const char *str) {
+    // { None, First, Second, Both };
+    bool valid = true;
+    size_t slen = strlen(str);
+    if (strncasecmp(str, "none", slen) == 0) {
+        fileTypes = First;
+    } else if (strncasecmp(str, "first", slen) == 0) {
+        fileTypes = First;
+    } else  if (strncasecmp(str, "second", slen) == 0) {
+        fileTypes = Second;
+    } else  if (strncasecmp(str, "both", slen) == 0) {
+        fileTypes = Both;
+    } else {
+        valid = false;
+    }
+
+    return valid;
 }

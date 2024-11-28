@@ -30,12 +30,17 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+#include "ll_stdhdr.hpp"
 #include "dupscan.hpp"
 #include "directory.hpp"
-// #include "md5.hpp"
-// typedef lstring HashValue;   // md5
+
+#ifdef USE_MD5
+#include "md5.hpp"
+typedef lstring HashValue;
+#else
 #include "xxhash64.hpp"
-typedef uint64_t HashValue;     // xxHash64
+typedef uint64_t HashValue;
+#endif
 
 #include <assert.h>
 #include <iostream>
@@ -183,24 +188,33 @@ void DupScan::showDuplicate(const lstring& filePath1, const lstring& filePath2) 
     command.sameCnt++;
     if (command.showSame) {
         std::cout << command.preDup;
-        if (command.logfile == 0 || command.logfile == 1)
+        if (command.showFiles == Command::Both || command.showFiles == Command::First)
             std::cout << filePath1;
-        if (command.logfile == 0)
+        if (command.showFiles == Command::Both)
             std::cout << command.separator;
-        if (command.logfile == 0 || command.logfile == 2)
+        if (command.showFiles == Command::Both || command.showFiles == Command::Second)
             std::cout << filePath2;
         std::cout << command.postDivider;
         
         if (command.hardlink) {
-            assert(true);
-            Directory_files::deleteFile(filePath2);
-            //TODO  hardlink(filePath1, filePath2);
-        } else if (command.deletefile != 0) {
-            const lstring& delPath = command.deletefile == 1 ? filePath1 : filePath2;
-            if (command.dryrun)
-                std::cerr << "DEBUG - Would delete " << delPath << std::endl;
-            else
-                Directory_files::deleteFile(delPath);
+            assert(true);  // TODO - implement hardlnk
+            // Directory_files::deleteFile(command.dryrun, filePath2);
+            // Directory_files::hardlink(filePath1, filePath2);
+        } else if (command.deleteFiles != Command::None) {
+            switch (command.deleteFiles) {
+            case Command::None:
+                break;
+            case Command::First:
+                Directory_files::deleteFile(command.dryrun, filePath1);
+                break;
+            case Command::Second:
+                Directory_files::deleteFile(command.dryrun, filePath2);
+                break;
+            case Command::Both:
+                Directory_files::deleteFile(command.dryrun, filePath1);
+                Directory_files::deleteFile(command.dryrun, filePath2);
+                break;
+            }
         }
     }
 }
@@ -210,11 +224,11 @@ void DupScan::showDifferent(const lstring& filePath1, const lstring& filePath2) 
     command.diffCnt++;
     if (command.showDiff) {
         std::cout << command.preDiff;
-        if (command.logfile != 2)
+        if (command.showFiles != Command::Second)
             std::cout << filePath1;
-        if (command.logfile == 0)
+        if (command.showFiles != Command::None)
             std::cout << command.separator;
-        if (command.logfile != 1)
+        if (command.showFiles != Command::First)
             std::cout << filePath2;
         std::cout << command.postDivider;
     }

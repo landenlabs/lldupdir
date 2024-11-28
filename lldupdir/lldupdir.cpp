@@ -40,7 +40,7 @@
 #include "ll_stdhdr.hpp"
 #include "directory.hpp"
 #include "split.hpp"
-#include "commands.hpp"
+#include "command.hpp"
 #include "dupscan.hpp"
 #include "colors.hpp"
 
@@ -67,8 +67,7 @@ typedef unsigned int uint;
 uint optionErrCnt = 0;
 uint patternErrCnt = 0;
 
-#if defined(_WIN32) || defined(_WIN64)
-    // const char SLASH_CHAR('\\');
+#ifdef HAVE_WIN
     #include <assert.h>
     #define strncasecmp _strnicmp
     #if !defined(S_ISREG) && defined(S_IFMT) && defined(S_IFREG)
@@ -131,7 +130,7 @@ bool ValidOption(const char* validCmd, const char* possibleCmd, bool reportErr =
     size_t validLen = strlen(validCmd);
     size_t possibleLen = strlen(possibleCmd);
 
-    if ( strncasecmp(validCmd, possibleCmd, std::min(validLen, possibleLen)) == 0)
+    if (strncasecmp(validCmd, possibleCmd, std::min(validLen, possibleLen)) == 0)
         return true;
 
     if (reportErr) {
@@ -140,6 +139,7 @@ bool ValidOption(const char* validCmd, const char* possibleCmd, bool reportErr =
     }
     return false;
 }
+
 // ---------------------------------------------------------------------------
 // Convert special characters from text to binary.
 static std::string& ConvertSpecialChar(std::string& inOut) {
@@ -207,9 +207,6 @@ void showHelp(const char* arg0) {
         "\n"
         "_p_Options (only first unique characters required, options can be repeated): \n"
         "\n"
-        // "   -compareAxx       ; Find pair of encrypted path1/foo-xls.axx and path2/foo-xls.axx \n"
-        // "   -duplicateAxx     ; Find pair of encrypted in raw foo-xls.axx and foo.xls \n"
-        // "   -file             ; Find duplicate files by name \n"
         "\n"
         //    "   -invert           ; Invert test output "
         "   -_y_includeFile=<filePattern>   ; -inc=*.java \n"
@@ -224,7 +221,8 @@ void showHelp(const char* arg0) {
         "   -_y_ExcludePath=<pathPattern>   ; -Exc=*/bin/* -Exe=*/build/* \n"
 #endif
         "   -verbose \n"
-        
+        "   -quiet \n"
+
         "\n"
         "_p_Options:\n"
         "   -_y_showDiff           ; Show files that differ\n"
@@ -236,19 +234,19 @@ void showHelp(const char* arg0) {
         "   -_y_preDup=<text>      ; Prefix before duplicates, default nothing  \n"
         "   -_y_preDiff=<text>     ; Prefix before diffences, default: \"!= \"  \n"
         "   -_y_preMiss=<text>     ; Prefix before missing, default: \"--  \" \n"
-        // "   -_y_preDivider=<text>  ; Pre group divider output before groups  \n"
         "   -_y_postDivider=<text> ; Divider for dup and diff, def: \"__\\n\"  \n"
         "   -_y_separator=<text>   ; Separator  \n"
         //        "   -ignoreHardlink   ; \n"
         //        "   -ignoreSymlink    ; \n"
         "\n"
         "_p_Options (only when scanning two directories) :\n"
-        "   -_y_simple             ; Only files no pre or separators \n"
-        "   -_y_log=[1|2]          ; Only show 1st or 2nd file for Dup or Diff \n"
-        "   -_y_delete=[1|2]       ; If dup, delete file from directory 1 or 2 \n"
+        "   -_y_simple                      ; Show files no prefix or separators \n"
+        "   -_y_log=[first|second]          ; Only show 1st or 2nd file for Dup or Diff \n"
+        "   -_y_no                          ; DryRun, show delete but don't do delete \n"
+        "   -_y_delete=[first|second|both]  ; If dup or diff, delete 1st, 2nd or both files \n"
         "\n"
         "_p_Examples: \n"
-        "  Find file matches by name and hash value (fastest with only 2 dirs) \n"
+        "  Find file matches by name and hash value (_P_fastest with only 2 dirs_X_) \n"
         "   lldupdir  dir1 dir2/subdir  \n"
         "   lldupdir  -_y_showMiss -_y_showDiff dir1 dir2/subdir  \n"
         "   lldupdir  -_y_hideDup -_y_showMiss -_y_showDiff dir1 dir2/subdir  \n"
@@ -260,7 +258,6 @@ void showHelp(const char* arg0) {
         "\n"
         "  Change how output appears \n"
         "   lldupdir  -_y_sep=\" /  \"  dir1 dir2/subdir dir3\n"
-        //       "   lldupdir   -just -ignore . | grep png | le -I=-  '-c=lr ' \n"
         "\n"
         "\n";
 
@@ -288,8 +285,6 @@ void showUnknown(const char* argStr) {
 // ---------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
     DupFiles dupFiles;
-    DupDecode  dupDecode;
-    CompareAxxPair compareAxxPair;
 
     Command* commandPtr = &dupFiles;
     StringList fileDirList;
@@ -312,12 +307,9 @@ int main(int argc, char* argv[]) {
                     
                     const char* cmdName = cmd + 1;
                     switch (cmd[1]) {
-                    case 'd':   // delete=1|2
+                     case 'd':   // delete=None|First|Second|Both
                         if (ValidOption("deleteFile", cmdName)) {
-                            char* endPtr;
-                            commandPtr->deletefile = (unsigned)strtoul(value, &endPtr, 10);
-                            if (*endPtr == '\0' && commandPtr->deletefile < 3)
-                                continue;
+                            Command::getFileTypes(commandPtr->deleteFiles, value);
                         }
                         break;
                     case 'e':   // excludeFile=<pat>
@@ -354,11 +346,9 @@ int main(int argc, char* argv[]) {
                         continue;
                       }
                       break;
-                    case 'l':   // log=[1|2]
-                        if (ValidOption("log", cmdName)) {
-                            char* endPtr;
-                            commandPtr->logfile = (unsigned)strtoul(value, &endPtr, 10);
-                            if (*endPtr == '\0' && commandPtr->logfile < 3)
+                    case 'l':   // log=First|Second   def=Both
+                        if (ValidOption("log", cmd + 1)) {
+                            if (Command::getFileTypes(commandPtr->showFiles, value))
                                 continue;
                         }
                         break;
@@ -388,11 +378,9 @@ int main(int argc, char* argv[]) {
                         break;
 
                     default:
-                        // show error below,
+                        showUnknown(argStr);
                         break;
                     }
-
-                    showUnknown(argStr);
                 } else {
                     const char* cmdName = argStr + 1;
                     switch (argStr[1]) {

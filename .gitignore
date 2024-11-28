@@ -7,4 +7,9 @@ git-notes.txt
 *.xcuserstate
 
 # Windows VisualStudio
-# TODO add excludes
+# windows
+.ipch/
+.vs/
+.obj
+.exe
+

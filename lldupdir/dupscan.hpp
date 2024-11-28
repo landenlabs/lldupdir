@@ -50,7 +50,7 @@
 #else
 #endif
 
-#include "commands.hpp"
+#include "command.hpp"
 #include <set>
 typedef set<lstring> StringSet;
 

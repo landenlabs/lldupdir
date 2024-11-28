@@ -169,8 +169,6 @@ const std::string currentDateTime(time_t& now) {
     return buf;
 }
 
-
-
 // ---------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
     ParseUtil parser;

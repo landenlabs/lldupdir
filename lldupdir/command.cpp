@@ -576,6 +576,7 @@ bool Command::getFileTypes(Command::FileTypes &fileTypes, const char *str) {
         fileTypes = Both;
     } else {
         valid = false;
+        std::cerr << "Invalid type:" << str << ", valid are: first, second or both\n";
     }
 
     return valid;

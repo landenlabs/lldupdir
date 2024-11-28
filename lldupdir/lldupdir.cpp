@@ -62,9 +62,6 @@ using namespace std;
 // Helper types
 typedef unsigned int uint;
 
-ParseUtil parser;
-
-
 // ---------------------------------------------------------------------------
 // Recurse over directories, locate files.
 static size_t InspectFiles(Command& command, const lstring& dirname) {
@@ -94,7 +91,6 @@ static size_t InspectFiles(Command& command, const lstring& dirname) {
 
     return fileCount;
 }
-
 
 // ---------------------------------------------------------------------------
 void showHelp(const char* arg0) {
@@ -177,8 +173,8 @@ const std::string currentDateTime(time_t& now) {
 
 // ---------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
+    ParseUtil parser;
     DupFiles dupFiles;
-
     Command* commandPtr = &dupFiles;
     StringList extraDirList;
 
@@ -199,7 +195,7 @@ int main(int argc, char* argv[]) {
                         cmd.erase(0);   // allow -- prefix on commands
                     
                     const char* cmdName = cmd + 1;
-                    switch (cmd[1]) {
+                    switch (*cmdName) {
                      case 'd':   // delete=None|First|Second|Both
                         if (parser.validOption("deleteFile", cmdName)) {
                             Command::getFileTypes(commandPtr->deleteFiles, value);

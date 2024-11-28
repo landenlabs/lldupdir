@@ -197,6 +197,7 @@ void DupScan::showDuplicate(const lstring& filePath1, const lstring& filePath2) 
         std::cout << command.postDivider;
         
         if (command.hardlink) {
+            std::cerr << "Hardlink option not yet implemented\n";
             assert(true);  // TODO - implement hardlnk
             // Directory_files::deleteFile(command.dryrun, filePath2);
             // Directory_files::hardlink(filePath1, filePath2);

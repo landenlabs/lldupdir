@@ -202,16 +202,16 @@ int main(int argc, char* argv[]) {
                             }
                         }
                         break;
-                    case 'e':   // -excludeFile=<pat>
+                    case 'e':   // -excludeFile=<patFile>
                         parser.validPattern(commandPtr->excludeFilePatList, value, "excludeFile", cmdName);
                         break;
-                    case 'E':   // -ExcludeDir=<pat>
+                    case 'E':   // -ExcludeDir=<patPath>
                         parser.validPattern(commandPtr->excludePathPatList, value, "ExcludeDir", cmdName);
                         break;
-                    case 'i':   // -includeFile=<pat>
+                    case 'i':   // -includeFile=<patFile>
                         parser.validPattern(commandPtr->includeFilePatList, value, "includeFile", cmdName);
                         break;
-                    case 'I':   // -IncludeDir=<pat>
+                    case 'I':   // -IncludeDir=<patPath>
                         parser.validPattern(commandPtr->includePathPatList, value, "includeDir", cmdName);
                         break;
                     case 'l':   // log=First|Second   def=Both

@@ -62,8 +62,12 @@ std::regex ParseUtil::getRegEx(const char* value) {
     return std::regex("");
 }
 
+#ifdef HAVE_WIN
+#define strncasecmp _strnicmp
+#endif
+
 //-------------------------------------------------------------------------------------------------
-// Validate option matchs and optionally report problem to user.
+// Validate option matches and optionally report problem to user.
 bool ParseUtil::validOption(const char* validCmd, const char* possibleCmd, bool reportErr) {
     // Starts with validCmd else mark error
     size_t validLen = strlen(validCmd);

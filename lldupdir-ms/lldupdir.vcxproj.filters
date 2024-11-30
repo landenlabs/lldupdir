@@ -33,6 +33,9 @@
     <ClCompile Include="..\lldupdir\md5.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\lldupdir\parseutil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\lldupdir\directory.hpp">
@@ -42,9 +45,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\lldupdir\lstring.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\lldupdir\split.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\lldupdir\command.hpp">
@@ -59,10 +59,10 @@
     <ClInclude Include="..\lldupdir\dupscan.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\lldupdir\colors.hpp">
+    <ClInclude Include="..\lldupdir\xxhash64.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\lldupdir\xxhash64.hpp">
+    <ClInclude Include="..\lldupdir\parseutil.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -123,6 +123,12 @@ inline string& replaceRE(string& inOut, const char* findRE, const char* replaceW
     return inOut;
 }
 
+#ifdef HAVE_WIN
+#include <windows.h>
+#include <stdio.h>
+#endif
+
+
 class Colors {
 public:
 #ifdef HAVE_WIN

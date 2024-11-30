@@ -25,9 +25,9 @@
     <ClCompile Include="..\lldupdir\hash.cpp" />
     <ClCompile Include="..\lldupdir\lldupdir.cpp" />
     <ClCompile Include="..\lldupdir\md5.cpp" />
+    <ClCompile Include="..\lldupdir\parseutil.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\lldupdir\colors.hpp" />
     <ClInclude Include="..\lldupdir\command.hpp" />
     <ClInclude Include="..\lldupdir\directory.hpp" />
     <ClInclude Include="..\lldupdir\dupscan.hpp" />
@@ -35,7 +35,7 @@
     <ClInclude Include="..\lldupdir\ll_stdhdr.hpp" />
     <ClInclude Include="..\lldupdir\lstring.hpp" />
     <ClInclude Include="..\lldupdir\md5.hpp" />
-    <ClInclude Include="..\lldupdir\split.hpp" />
+    <ClInclude Include="..\lldupdir\parseutil.hpp" />
     <ClInclude Include="..\lldupdir\xxhash64.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

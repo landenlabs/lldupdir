@@ -143,7 +143,11 @@ void showHelp(const char* arg0) {
         "   lldupdir  dir1 dir2/subdir  \n"
         "   lldupdir  -_y_showMiss -_y_showDiff dir1 dir2/subdir  \n"
         "   lldupdir  -_y_hideDup -_y_showMiss -_y_showDiff dir1 dir2/subdir  \n"
-        "   lldupdir -_y_Exc=*bin* -_y_exc=*.exe -_y_hideDup -_y_showMiss   dir1 dir2/subdir  \n"
+#ifdef HAVE_WIN
+        "   lldupdir -_y_Exc=*\\\\.git\\\\* -_y_exc=*.exe -_y_hideDup -_y_showMiss   dir1 dir2/subdir  \n"
+#else
+        "   lldupdir -_y_Exc=*/.git/* -_y_exc=*.exe -_y_hideDup -_y_showMiss   dir1 dir2/subdir  \n"
+#endif
         "\n"
         "  Find file matches by matching hash value, slower than above, 1 or three or more dirs \n"
         "   lldupdir  -_y_showAll  dir1 \n"

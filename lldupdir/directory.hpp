@@ -149,6 +149,8 @@ namespace DirUtil {
  size_t fileLength(const lstring& path);
  bool fileExists(const char* path);
 
+ inline unsigned int minU(unsigned int A, unsigned int B) { return (A<=B) ? A:B; }
+
  // Utility to join directory and name and replace any double slashes with a single slash.
 inline const lstring& join(lstring& outPath, const char* inDir, const char* inName, unsigned int pathOff = 0) {
      // return realpath(fname.c_str(), my_fullname) or   GetFullPath(fname);

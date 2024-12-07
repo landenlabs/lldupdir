@@ -75,6 +75,11 @@ public:
     bool sameName = true;
     bool justName = false;
     bool ignoreExtn = false;
+
+    // TODO - not yet implemented
+    bool ignoreHardLinks = false;
+    bool ignoreSoftLinks = false;
+
     
     bool dryrun = false;        // -n scan and report but do not delete or hardline. 
     bool hardlink = false;      // If dup, hardlink
@@ -85,7 +90,6 @@ public:
     bool showMiss = false;
 
     bool showAbsPath = false;
-    uint pathOff = 0;           // absolute=0, relative=CWD length;
 
     unsigned quiet = 0;             // 0=show output, 1=don't show dup/diff/miss, 2=suppress all output
     enum FileTypes { None, First, Second, Both };
@@ -141,6 +145,8 @@ public:
 
     static bool getFileTypes(FileTypes& fileTypes, const char *str);
 
+    const char* absOrRel(const char* fullPath) const;
+    const char* absOrRel(const string& fullPath) const;
 };
 
 

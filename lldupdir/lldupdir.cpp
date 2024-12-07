@@ -86,8 +86,8 @@ static size_t InspectFiles(Command& command, const lstring& dirname) {
 
 // ---------------------------------------------------------------------------
 void showHelp(const char* arg0) {
-    const char* helpMsg = "  Dennis Lang v2.2 (landenlabs.com) " __DATE__ "\n\n"
-        "_p_Des: 'Find duplicate files\n"
+    const char* helpMsg = "  Dennis Lang v2.3 (landenlabs.com) " __DATE__ "\n\n"
+        "_p_Des: 'Find duplicate files by comparing length, hash value and optional name. \n"
         "_p_Use: lldupdir [options] directories...   or  files\n"
         "\n"
         "_p_Options (only first unique characters required, options can be repeated): \n"
@@ -109,26 +109,32 @@ void showHelp(const char* arg0) {
         "   -quiet \n"
 
         "\n"
-        "_p_Options:\n"
+        "_p_Options (default show only duplicates):\n"
+        "   -_y_showAll            ; Compare all files for matching hash \n"
         "   -_y_showDiff           ; Show files that differ\n"
         "   -_y_showMiss           ; Show missing files \n"
-        "   -_y_sameAll            ; Compare all files for matching hash \n"
-        "   -_y_hideDup            ; Don't show duplicate files \n"
-        "   -_y_justName           ; Match duplicate name only, not contents \n"
-        //      "   -ignoreExtn         ; With -justName, also ignore extension \n"
+        "   -_y_hideDup            ; Don't show duplicate files  \n"
+
         "   -_y_preDup=<text>      ; Prefix before duplicates, default nothing  \n"
-        "   -_y_preDiff=<text>     ; Prefix before diffences, default: \"!= \"  \n"
+        "   -_y_preDiff=<text>     ; Prefix before differences, default: \"!= \"  \n"
         "   -_y_preMiss=<text>     ; Prefix before missing, default: \"--  \" \n"
         "   -_y_postDivider=<text> ; Divider for dup and diff, def: \"__\\n\"  \n"
-        "   -_y_separator=<text>   ; Separator  \n"
-        //        "   -ignoreHardlink   ; \n"
-        //        "   -ignoreSymlink    ; \n"
+        "   -_y_separator=<text>   ; Separator, def: \", \"  \n"
         "\n"
-        "_p_Options (only when scanning two directories) :\n"
+        "_p_Options (when scanning two directories, dup if names and hash match) :\n"
         "   -_y_simple                      ; Show files no prefix or separators \n"
         "   -_y_log=[first|second]          ; Only show 1st or 2nd file for Dup or Diff \n"
         "   -_y_no                          ; DryRun, show delete but don't do delete \n"
         "   -_y_delete=[first|second|both]  ; If dup or diff, delete 1st, 2nd or both files \n"
+        "\n"
+        "_p_Options (when comparing one dir or 3 or more directories)\n"
+        "        Default compares all files for matching length and hash value\n"
+        "   -_y_justName           ; Match duplicate name only, not contents \n"
+        "   -_y_ignoreExtn         ; With -justName, also ignore extension \n"
+        "   -_y_sameName           ; Compare file contents only if same name \n"
+
+        //        "   -ignoreHardlinks   ; \n"
+        //        "   -ignoreSoftlinks    ; \n"
         "\n"
         "_p_Examples: \n"
         "  Find file matches by name and hash value (_P_fastest with only 2 dirs_X_) \n"
@@ -136,9 +142,9 @@ void showHelp(const char* arg0) {
         "   lldupdir  -_y_showMiss -_y_showDiff dir1 dir2/subdir  \n"
         "   lldupdir  -_y_hideDup -_y_showMiss -_y_showDiff dir1 dir2/subdir  \n"
 #ifdef HAVE_WIN
-        "   lldupdir -_y_Exc=*\\\\.git\\\\* -_y_exc=*.exe -_y_hideDup -_y_showMiss   dir1 dir2/subdir  \n"
+        "   lldupdir -_y_Exc=*\\\\.git\\\\* -_y_exc=*.exe -_y_exc=*.zip -_y_hideDup -_y_showMiss   dir1 dir2/subdir  \n"
 #else
-        "   lldupdir -_y_Exc=*/.git/* -_y_exc=*.exe -_y_hideDup -_y_showMiss   dir1 dir2/subdir  \n"
+        "   lldupdir -_y_Exc=\\*/.git/\\* -_y_exc=\\*.exe -_y_hideDup -_y_showMiss   dir1 dir2/subdir  \n"
 #endif
         "\n"
         "  Find file matches by matching hash value, slower than above, 1 or three or more dirs \n"
@@ -283,20 +289,19 @@ int main(int argc, char* argv[]) {
                         break;
 
                     case 's':
-                        if (parser.validOption("sameAll", cmdName, false)) {
-                            commandPtr->sameName = false;
-                        } else if (parser.validOption("showAll", cmdName, false)) {
+                        if (parser.validOption("showAll", cmdName, false)) {
                             commandPtr->showSame = commandPtr->showDiff = commandPtr->showMiss = true;
                         } else if (parser.validOption("showDiff", cmdName, false)) {
                             commandPtr->showDiff = true;
                         } else if (parser.validOption("showMiss", cmdName, false)) {
                             commandPtr->showMiss = true;
                         } else if (parser.validOption("showSame", cmdName, false)) {
-                            commandPtr->showSame = true;
+                            commandPtr->showSame = true;        // default
                         } else if (parser.validOption("showAbs", cmdName, false)) {
                             commandPtr->showAbsPath = true;
-                            commandPtr->pathOff = 0;
-                        } else if (parser.validOption("simple", cmdName, false)) {
+                        } else if (parser.validOption("sameName", cmdName, false)) {
+                            commandPtr->sameName = false;
+                        } else if (parser.validOption("simple", cmdName)) {
                             commandPtr->preDup = commandPtr->preDiff = "";
                             commandPtr->separator = " ";
                             commandPtr->postDivider = "\n";

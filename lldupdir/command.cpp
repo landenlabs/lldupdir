@@ -272,13 +272,12 @@ static struct stat  print(const lstring& path, struct stat* pInfo) {
 // ---------------------------------------------------------------------------
 Command::Command(char c): code(c) {
     getcwd(CWD_BUF, sizeof(CWD_BUF));
-    CWD_LEN = (unsigned)strlen(CWD_BUF) + 1;
+    CWD_LEN = (unsigned)strlen(CWD_BUF);
     showAbsPath = false;
-    pathOff = CWD_LEN;
 }
 
 // ---------------------------------------------------------------------------
-bool Command::validFile(const lstring& name, const lstring& fullname)  {
+bool Command::validFile(const lstring& name, const lstring& fullname) {
   bool isValid =
       (!name.empty() && !ParseUtil::FileMatches(name, excludeFilePatList, false) &&
        ParseUtil::FileMatches(name, includeFilePatList, true) &&
@@ -290,7 +289,23 @@ bool Command::validFile(const lstring& name, const lstring& fullname)  {
     return isValid;
 }
 
+// ---------------------------------------------------------------------------
+const char*  Command::absOrRel(const char* fullPath) const {
+    if (!showAbsPath && strncmp(fullPath, CWD_BUF, CWD_LEN) == 0)  
+        return fullPath + CWD_LEN + 1;
+    else
+        return fullPath;
+}
+const char*  Command::absOrRel(const string& fullPath) const {
+    if (!showAbsPath && strncmp(fullPath.c_str(), CWD_BUF, CWD_LEN) == 0)
+        return fullPath.c_str() + CWD_LEN + 1;
+    else
+        return fullPath.c_str();
+}
 
+
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 map<std::string, IntList> fileList;
 std::vector<std::string> pathList;
 std::string lastPath;
@@ -354,12 +369,12 @@ public:
 
 void DupFiles::printPaths(const IntList& pathListIdx, const std::string& name) {
     for (unsigned plIdx = 0; plIdx < pathListIdx.size(); plIdx++) {
-        lstring fullPath = lstring(pathList[pathListIdx[plIdx]].c_str() + pathOff) + name;
+        lstring filePath = absOrRel(pathList[pathListIdx[plIdx]]) + name;
         if (verbose) {
-            print(fullPath, NULL);
+            print(filePath, NULL);
         } else {
             if (plIdx != 0) std::cout << separator;
-            std::cout << fullPath;
+            std::cout << filePath;
         }
     }
 }
@@ -428,7 +443,7 @@ bool DupFiles::end() {
                     HashValue hashValue = fileHash[fullPath];
                     bool isDup = (hashDups[hashValue] != 1);
                     if (verbose) {
-                        std::cout << (isDup ? "dup " : "    ") << fileHash[fullPath] << " ";
+                        std::cout << (isDup ? preDup : preDiff) << fileHash[fullPath] << " ";
                         print(fullPath, NULL);
                         // std::cout << endl;
                     } else if (isDup != invert) {
@@ -507,7 +522,7 @@ bool DupFiles::end() {
                         print(fullPath, NULL);
                     } else {
                         if (mIdx != 0) std::cout << separator;
-                        std::cout << fullPath;
+                        std::cout << absOrRel(fullPath);
                     }
                 }
                 std::cout << postDivider;

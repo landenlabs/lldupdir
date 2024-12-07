@@ -30,30 +30,37 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include <assert.h>
-#include <fstream>
-#include <iostream>
-#include <sstream>
-#include <iomanip>
-#include <stdio.h>
-#include <errno.h>
-#include <map>
-#include <vector>
-
 #include "ll_stdhdr.hpp"
 #include "command.hpp"
+#include "parseutil.hpp"  // fileMatches
 #include "directory.hpp"
 #include "md5.hpp"
 #include "xxhash64.hpp"
 
+#include <assert.h>
+#include <fstream>
+#include <iostream>
+#include <iomanip>
+#include <map>
+#include <vector>
 
-const char EXTN_CHAR('.');
-const lstring EMPTY = "";
+
+
+#ifdef HAVE_WIN
+#include <direct.h> // _getcwd
+#define chdir _chdir
+#define getcwd _getcwd
+#else
+const size_t MAX_PATH = __DARWIN_MAXPATHLEN;
+#endif
+
+static const lstring EMPTY = "";
+static char CWD_BUF[MAX_PATH];
+static unsigned CWD_LEN = 0;
 
 // ---------------------------------------------------------------------------
 // Forward declaration
 bool RunCommand(const char* command, DWORD* pExitCode, int waitMsec);
-bool deleteFile(const char* path);
 
 // ---------------------------------------------------------------------------
 const string Q2 = "\"";
@@ -219,47 +226,6 @@ bool RunCommand(const char* command, DWORD* pExitCode, int waitMsec) {
 
 
 // ---------------------------------------------------------------------------
-// Extract name part from path.
-lstring& getName(lstring& outName, const lstring& inPath) {
-    size_t nameStart = inPath.rfind(SLASH_CHAR) + 1;
-    if (nameStart == 0)
-        outName = inPath;
-    else
-        outName = inPath.substr(nameStart);
-    return outName;
-}
-
-// ---------------------------------------------------------------------------
-// Extract name part from path.
-lstring& removeExtn(lstring& outName, const lstring& inPath) {
-    size_t extnPos = inPath.rfind(EXTN_CHAR);
-    if (extnPos == std::string::npos)
-        outName = inPath;
-    else
-        outName = inPath.substr(0, extnPos);
-    return outName;
-}
-
-// ---------------------------------------------------------------------------
-// Return true if inName matches pattern in patternList
-bool FileMatches(const lstring& inName, const PatternList& patternList, bool emptyResult) {
-    if (patternList.empty() || inName.empty())
-        return emptyResult;
-
-    for (size_t idx = 0; idx != patternList.size(); idx++)
-        if (std::regex_match(inName.begin(), inName.end(), patternList[idx]))
-            return true;
-
-    return false;
-}
-
-// ---------------------------------------------------------------------------
-static size_t fileLength(const lstring& path) {
-    struct stat info;
-    return (stat(path, &info) == 0) ? info.st_size : -1;
-}
-
-// ---------------------------------------------------------------------------
 static struct stat  print(const lstring& path, struct stat* pInfo) {
     struct stat info;
     int result = 0;
@@ -303,30 +269,21 @@ static struct stat  print(const lstring& path, struct stat* pInfo) {
 
 
 // ---------------------------------------------------------------------------
-bool deleteFile(const char* path) {
-
-#ifdef HAVE_WIN
-    SetFileAttributes(path, FILE_ATTRIBUTE_NORMAL);
-    if (0 == DeleteFile(path)) {
-        DWORD err = GetLastError();
-        if (err != ERROR_FILE_NOT_FOUND) {  // 2 = ERROR_FILE_NOT_FOUND
-            std::cerr << err << " error trying to delete " << path << std::endl;
-            return false;
-        }
-    }
-#else
-    unlink(path);
-#endif
-    return true;
+// ---------------------------------------------------------------------------
+Command::Command(char c): code(c) {
+    getcwd(CWD_BUF, sizeof(CWD_BUF));
+    CWD_LEN = (unsigned)strlen(CWD_BUF) + 1;
+    showAbsPath = false;
+    pathOff = CWD_LEN;
 }
 
 // ---------------------------------------------------------------------------
 bool Command::validFile(const lstring& name, const lstring& fullname)  {
   bool isValid =
-      (!name.empty() && !FileMatches(name, excludeFilePatList, false) &&
-       FileMatches(name, includeFilePatList, true) &&
-       !FileMatches(fullname, excludePathPatList, false) &&
-       FileMatches(fullname, includePathPatList, true));
+      (!name.empty() && !ParseUtil::FileMatches(name, excludeFilePatList, false) &&
+       ParseUtil::FileMatches(name, includeFilePatList, true) &&
+       !ParseUtil::FileMatches(fullname, excludePathPatList, false) &&
+       ParseUtil::FileMatches(fullname, includePathPatList, true));
 
     if (! isValid)
         skipCnt++;
@@ -349,11 +306,11 @@ bool DupFiles::begin(StringList& fileDirList) {
 
 // ---------------------------------------------------------------------------
 // Locate matching files which are not in exclude list.
-// Locate duplcate files.
+// Locate duplicate files.
 size_t DupFiles::add(const lstring& fullname) {
     size_t fileCount = 0;
     lstring name;
-    getName(name, fullname);
+    DirUtil::getName(name, fullname);
 
     if (validFile(name, fullname)) {
         std::string path = fullname.substr(0, fullname.length() - name.length());
@@ -397,7 +354,7 @@ public:
 
 void DupFiles::printPaths(const IntList& pathListIdx, const std::string& name) {
     for (unsigned plIdx = 0; plIdx < pathListIdx.size(); plIdx++) {
-        lstring fullPath = pathList[pathListIdx[plIdx]] + name;
+        lstring fullPath = lstring(pathList[pathListIdx[plIdx]].c_str() + pathOff) + name;
         if (verbose) {
             print(fullPath, NULL);
         } else {
@@ -417,8 +374,8 @@ bool DupFiles::end() {
         std::map<lstring, std::vector<const string* >> noExtnList;       // TODO - make string& not string
         for (auto it = fileList.cbegin(); it != fileList.cend(); it++) {
             const string& fullname = it->first;
-            getName(noExtn, fullname);
-            removeExtn(noExtn, noExtn);
+            DirUtil::getName(noExtn, fullname);
+            DirUtil::removeExtn(noExtn, noExtn);
             noExtnList[noExtn].push_back(&fullname);
         }
 
@@ -512,7 +469,7 @@ bool DupFiles::end() {
             for (unsigned plIdx = 0; plIdx < pathListIdx.size(); plIdx++) {
                 unsigned plPos = pathListIdx[plIdx];
                 lstring fullPath = pathList[plPos] + it->first;
-                size_t fileLen = fileLength(fullPath);
+                size_t fileLen = DirUtil::fileLength(fullPath);
                 fileLen = (fileLen != 0) ? fileLen : std::hash<std::string> {}(fullPath);
                 const string& name = it->first;
                 PathParts pathParts(plPos, name);

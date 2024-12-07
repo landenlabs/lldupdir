@@ -34,21 +34,11 @@
 #include "directory.hpp"
 
 #include <iostream>
-#include <stdio.h>
-#include <errno.h>
+
 
 #ifdef HAVE_WIN
-    #include <windows.h>
-#endif
-
-const char EXTN_CHAR = '.';
-
-#ifdef HAVE_WIN
-
-// #include <sys/stat.h>
-// #include <sys/types.h>
+#include <windows.h>
 #include <io.h>
-// #include <stdio.h>
  
 typedef unsigned short mode_t;
 
@@ -56,6 +46,7 @@ static const mode_t S_IRUSR = mode_t(_S_IREAD);     //  read by user
 static const mode_t S_IWUSR = mode_t(_S_IWRITE);    //  write by user
 #define chmod _chmod
 
+const char EXTN_CHAR = '.';
 const lstring ANY("\\*");
 const lstring Directory_files::SLASH = "\\";
 const char Directory_files::SLASH_CHAR = '\\';
@@ -166,13 +157,6 @@ const lstring& Directory_files::fullName(lstring& fname) const {
     return GetFullPath(fname);
 }
 
-//-------------------------------------------------------------------------------------------------
-bool Directory_files::exists( const char* path) {
-    const DWORD attr = GetFileAttributes(path);
-    return (attr != INVALID_FILE_ATTRIBUTES);
-}
-
-
 
 #else
 
@@ -230,16 +214,12 @@ const lstring& Directory_files::fullName(lstring& fname) const {
     return join(fname, my_baseDir, my_pDirEnt->d_name);
 }
 
-//-------------------------------------------------------------------------------------------------
-bool Directory_files::exists(const char* path) {
-    return access(path, F_OK) == 0;
 
-}
 #endif
 
 //-------------------------------------------------------------------------------------------------
 // [static] Extract directory part from path.
-lstring& Directory_files::getDir(lstring& outDir, const lstring& inPath) {
+lstring& DirUtil::getDir(lstring& outDir, const lstring& inPath) {
     size_t nameStart = inPath.rfind(SLASH_CHAR);
     if (nameStart == string::npos)
         outDir.clear();
@@ -250,7 +230,7 @@ lstring& Directory_files::getDir(lstring& outDir, const lstring& inPath) {
 
 //-------------------------------------------------------------------------------------------------
 // [static]  Extract name part from path.
-lstring& Directory_files::getName(lstring& outName, const lstring& inPath) {
+lstring& DirUtil::getName(lstring& outName, const lstring& inPath) {
     size_t nameStart = inPath.rfind(SLASH_CHAR) + 1;
     if (nameStart == 0)
         outName = inPath;
@@ -258,10 +238,21 @@ lstring& Directory_files::getName(lstring& outName, const lstring& inPath) {
         outName = inPath.substr(nameStart);
     return outName;
 }
+ 
+// ---------------------------------------------------------------------------
+// Extract name part from path.
+lstring& DirUtil::removeExtn(lstring& outName, const lstring& inPath) {
+    size_t extnPos = inPath.rfind(EXTN_CHAR);
+    if (extnPos == std::string::npos)
+        outName = inPath;
+    else
+        outName = inPath.substr(0, extnPos);
+    return outName;
+}
 
 //-------------------------------------------------------------------------------------------------
 // [static]  Extract name part from path.
-lstring& Directory_files::getExt(lstring& outExt, const lstring& inPath) {
+lstring& DirUtil::getExt(lstring& outExt, const lstring& inPath) {
     size_t extPos = inPath.rfind(EXTN_CHAR);
     if (extPos == std::string::npos)
         outExt = "";
@@ -272,7 +263,7 @@ lstring& Directory_files::getExt(lstring& outExt, const lstring& inPath) {
 
 //-------------------------------------------------------------------------------------------------
 // [static] Delete file
-bool Directory_files::deleteFile(bool dryRun, const char* inPath) {
+bool DirUtil::deleteFile(bool dryRun, const char* inPath) {
     if (dryRun) {
         std::cerr << "Would delete " << inPath << std::endl;
         return true;
@@ -294,9 +285,29 @@ bool Directory_files::deleteFile(bool dryRun, const char* inPath) {
     return (err == 0);
 }
 
+/* 
+// ---------------------------------------------------------------------------
+bool deleteFile(const char* path) {
+
+#ifdef HAVE_WIN
+    SetFileAttributes(path, FILE_ATTRIBUTE_NORMAL);
+    if (0 == DeleteFile(path)) {
+        DWORD err = GetLastError();
+        if (err != ERROR_FILE_NOT_FOUND) {  // 2 = ERROR_FILE_NOT_FOUND
+            std::cerr << err << " error trying to delete " << path << std::endl;
+            return false;
+        }
+    }
+#else
+    unlink(path);
+#endif
+    return true;
+}
+*/
+
 //-------------------------------------------------------------------------------------------------
 // [static] Set permission on relative path file and directories.
-bool Directory_files::setPermission(const char* relPath, unsigned permission, bool setAllParts) {
+bool DirUtil::setPermission(const char* relPath, unsigned permission, bool setAllParts) {
     if (relPath == nullptr || strlen(relPath) <= 1)
         return true;
     
@@ -313,4 +324,20 @@ bool Directory_files::setPermission(const char* relPath, unsigned permission, bo
             return setPermission(getDir(dir, relPath), permission, true);
     }
     return (err == 0);
+}
+
+// ---------------------------------------------------------------------------
+size_t DirUtil::fileLength(const lstring& path) {
+    struct stat info;
+    return ( stat(path, &info) == 0 ) ? info.st_size : -1;
+}
+
+//-------------------------------------------------------------------------------------------------
+bool DirUtil::fileExists(const char* path) {
+#ifdef HAVE_WIN
+    const DWORD attr = GetFileAttributes(path);
+    return ( attr != INVALID_FILE_ATTRIBUTES );
+#else
+    return access(path, F_OK) == 0;
+#endif
 }

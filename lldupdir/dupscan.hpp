@@ -45,12 +45,8 @@
 #pragma once
 
 #include "ll_stdhdr.hpp"
-#ifdef HAVE_WIN
-    #include <windows.h>
-#else
-#endif
-
 #include "command.hpp"
+
 #include <set>
 typedef set<lstring> StringSet;
 
@@ -58,7 +54,7 @@ class DupScan {
 public:
     Command& command;
 
-    DupScan(Command& _command) : command(_command) { }
+    DupScan(Command& _command); 
 
     // Find duplicate files by name, size and hash_value
     //    Level used for diagnostics only.

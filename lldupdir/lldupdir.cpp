@@ -43,17 +43,9 @@
 #include "dupscan.hpp"
 #include "parseutil.hpp"
 
-#include <assert.h>
-#include <stdio.h>
-#include <ctype.h>
 #include <fstream>
 #include <iostream>
-#include <sstream>
-#include <iomanip>
 #include <vector>
-#include <map>
-#include <set>
-#include <algorithm>
 #include <regex>
 #include <exception>
 
@@ -63,7 +55,7 @@ using namespace std;
 typedef unsigned int uint;
 
 // ---------------------------------------------------------------------------
-// Recurse over directories, locate files.
+// Dive into directories, locate files.
 static size_t InspectFiles(Command& command, const lstring& dirname) {
     Directory_files directory(dirname);
     lstring fullname;
@@ -301,6 +293,9 @@ int main(int argc, char* argv[]) {
                             commandPtr->showMiss = true;
                         } else if (parser.validOption("showSame", cmdName, false)) {
                             commandPtr->showSame = true;
+                        } else if (parser.validOption("showAbs", cmdName, false)) {
+                            commandPtr->showAbsPath = true;
+                            commandPtr->pathOff = 0;
                         } else if (parser.validOption("simple", cmdName, false)) {
                             commandPtr->preDup = commandPtr->preDiff = "";
                             commandPtr->separator = " ";

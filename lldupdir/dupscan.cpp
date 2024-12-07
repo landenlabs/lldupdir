@@ -62,6 +62,10 @@ static size_t fileLength(const lstring& path) {
 }
 
 // ---------------------------------------------------------------------------
+DupScan::DupScan(Command& _command) : command(_command)  {
+}
+
+// ---------------------------------------------------------------------------
 bool DupScan::findDuplicates(unsigned level, const StringList& baseDirList, StringSet& subDirList) const {
     scanFiles(level, baseDirList, subDirList);
 
@@ -84,7 +88,7 @@ void DupScan::getFiles(unsigned level, const StringList& baseDirList, const Stri
     lstring joinBuf;
     for (const lstring& nextDir : nextDirList) {
         for (const lstring& baseDir : baseDirList) {
-            Directory_files directory(Directory_files::join(joinBuf, baseDir, nextDir));
+            Directory_files directory(DirUtil::join(joinBuf, baseDir, nextDir));
 
             while (directory.more()) {
                 if (! directory.is_directory()) {
@@ -92,7 +96,7 @@ void DupScan::getFiles(unsigned level, const StringList& baseDirList, const Stri
                     lstring fullname;
                     directory.fullName(fullname);
                     if (command.validFile(name, fullname)) {
-                        outFiles.insert(Directory_files::join(joinBuf, nextDir, name));
+                        outFiles.insert(DirUtil::join(joinBuf, nextDir, name));
                     }
                 }
             }
@@ -105,12 +109,12 @@ void DupScan::getDirs(unsigned level, const StringList& baseDirList, const Strin
     lstring joinBuf;
     for (const lstring& nextDir : nextDirList) {
         for (const lstring& baseDir : baseDirList) {
-            Directory_files directory(Directory_files::join(joinBuf, baseDir, nextDir));
+            Directory_files directory(DirUtil::join(joinBuf, baseDir, nextDir));
             lstring fullname;
 
             while (directory.more()) {
                 if (directory.is_directory()) {
-                    outDirList.insert(Directory_files::join(joinBuf, nextDir, directory.name()));
+                    outDirList.insert(DirUtil::join(joinBuf, nextDir, directory.name()));
                 }
             }
         }
@@ -123,7 +127,7 @@ void DupScan::compareFiles(unsigned level, const StringList& baseDirList, const 
 
     for (const lstring& file : files) {
         StringList::const_iterator dirIter = baseDirList.begin();
-        size_t fileLen1 = fileLength(Directory_files::join(joinBuf1, *dirIter++, file));
+        size_t fileLen1 = fileLength(DirUtil::join(joinBuf1, *dirIter++, file));
         size_t fileLen2 = 0;
         bool matchingLen = true;
 
@@ -131,7 +135,7 @@ void DupScan::compareFiles(unsigned level, const StringList& baseDirList, const 
             cerr << joinBuf1 << " len=" << fileLen1 << std::endl;
  
         while (dirIter != baseDirList.end()) {
-            fileLen2 = fileLength(Directory_files::join(joinBuf2, *dirIter++, file));
+            fileLen2 = fileLength(DirUtil::join(joinBuf2, *dirIter++, file));
 
             if (command.verbose)
                 cerr << joinBuf2 << " len=" << fileLen2 << std::endl;
@@ -155,14 +159,14 @@ void DupScan::compareFiles(unsigned level, const StringList& baseDirList, const 
 
         if (matchingLen) {
             dirIter = baseDirList.begin();
-            Directory_files::join(joinBuf1, *dirIter++, file);
+            DirUtil::join(joinBuf1, *dirIter++, file, command.pathOff);
             HashValue hash1 = XXHash64::compute(joinBuf1);  // hashValue = Md5::compute(joinBuf);
 
             if (command.verbose)
                 cerr << joinBuf1 << " hash=" << hash1 << std::endl;
 
             while (dirIter != baseDirList.end()) {
-                Directory_files::join(joinBuf2, *dirIter++, file);
+                DirUtil::join(joinBuf2, *dirIter++, file, command.pathOff);
                 HashValue hash2 = XXHash64::compute(joinBuf2); // hashValue = Md5::compute(joinBuf);
 
                 if (command.verbose)
@@ -199,21 +203,21 @@ void DupScan::showDuplicate(const lstring& filePath1, const lstring& filePath2) 
         if (command.hardlink) {
             std::cerr << "Hardlink option not yet implemented\n";
             assert(true);  // TODO - implement hardlnk
-            // Directory_files::deleteFile(command.dryrun, filePath2);
-            // Directory_files::hardlink(filePath1, filePath2);
+            // DirUtil::deleteFile(command.dryrun, filePath2);
+            // DirUtil::hardlink(filePath1, filePath2);
         } else if (command.deleteFiles != Command::None) {
             switch (command.deleteFiles) {
             case Command::None:
                 break;
             case Command::First:
-                Directory_files::deleteFile(command.dryrun, filePath1);
+                DirUtil::deleteFile(command.dryrun, filePath1);
                 break;
             case Command::Second:
-                Directory_files::deleteFile(command.dryrun, filePath2);
+                DirUtil::deleteFile(command.dryrun, filePath2);
                 break;
             case Command::Both:
-                Directory_files::deleteFile(command.dryrun, filePath1);
-                Directory_files::deleteFile(command.dryrun, filePath2);
+                DirUtil::deleteFile(command.dryrun, filePath1);
+                DirUtil::deleteFile(command.dryrun, filePath2);
                 break;
             }
         }
@@ -236,7 +240,7 @@ void DupScan::showDifferent(const lstring& filePath1, const lstring& filePath2) 
 }
 
 // ---------------------------------------------------------------------------
-void DupScan::showMissing(bool have1,  const lstring& filePath1, bool have2, const lstring& filePath2) const {
+void DupScan::showMissing(bool have1, const lstring& filePath1, bool have2, const lstring& filePath2) const {
     command.missCnt++;
     if (command.showMiss) {
         std::cout << command.preMissing;

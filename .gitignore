@@ -8,6 +8,8 @@
 # Windows VisualStudio
 # windows
 .ipch/
+x64/
+
 .vs/
 .obj
 .exe

@@ -52,13 +52,10 @@ public:
     bool validPattern(PatternList& outList, lstring& value, const char* validCmd, const char* possibleCmd, bool reportErr = true);
  
     bool validFile(fstream& stream, int mode, const lstring& value, const char* validCmd, const char* possibleCmd, bool reportErr = true);
-    
-    
-    static
-    const char* convertSpecialChar(const char* inPtr);
-    
-    static
-    lstring& getParts(
+
+    static bool FileMatches(const lstring& inName, const PatternList& patternList, bool emptyResult);
+    static const char* convertSpecialChar(const char* inPtr);
+    static lstring& getParts(
             lstring& outPart,
             const char* partSelector,
             const char* name,

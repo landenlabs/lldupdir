@@ -48,10 +48,10 @@
 
 #pragma once
 #include "ll_stdhdr.hpp"
+#include "lstring.hpp"
 
 #include <vector>
 #include <regex>
-#include "lstring.hpp"
 
 // Helper types
 typedef std::vector<lstring> StringList;
@@ -84,6 +84,9 @@ public:
     bool showDiff = false;
     bool showMiss = false;
 
+    bool showAbsPath = false;
+    uint pathOff = 0;           // absolute=0, relative=CWD length;
+
     unsigned quiet = 0;             // 0=show output, 1=don't show dup/diff/miss, 2=suppress all output
     enum FileTypes { None, First, Second, Both };
     FileTypes showFiles = Both;
@@ -107,8 +110,7 @@ private:
     char code;
 
 public:
-    Command(char c) : code(c) {
-    }
+    Command(char c);
 
     virtual  bool begin(StringList& fileDirList)  {
         return fileDirList.size() > 0;

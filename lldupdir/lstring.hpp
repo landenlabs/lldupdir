@@ -103,10 +103,8 @@ inline lstring operator+ (const lstring& lhs, const char*   rhs) {
 }
 
 // ---------------------------------------------------------------------------
-// Replace all occurances of 'search' with 'replace'
-inline const lstring& ReplaceAll(lstring& subject,
-    const lstring& search,
-    const lstring& replace) {
+// Replace all occurrences of 'search' with 'replace'
+inline const lstring& ReplaceAll(lstring& subject, const lstring& search, const lstring& replace) {
     size_t pos = 0;
     while ((pos = subject.find(search, pos)) != lstring::npos) {
         subject.replace(pos, search.length(), replace);

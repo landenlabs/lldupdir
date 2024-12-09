@@ -1,5 +1,6 @@
+# lldupdir
 git init
-git remote add origin https://landenlabs@github.com/landenlabs/llrename.git
+git remote add origin https://landenlabs@github.com/landenlabs/lldupdir.git
 
 git add .
 git commit -m "first commit"

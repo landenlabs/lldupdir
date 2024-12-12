@@ -44,7 +44,8 @@
 #include <map>
 #include <vector>
 
-
+bool useThreads = false;
+#include "hashfilethread.hpp"
 
 #ifdef HAVE_WIN
 #include <direct.h> // _getcwd

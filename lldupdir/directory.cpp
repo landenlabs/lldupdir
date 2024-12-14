@@ -40,7 +40,7 @@ const char EXTN_CHAR = '.';
 #ifdef HAVE_WIN
 #include <windows.h>
 #include <io.h>
- 
+
 typedef unsigned short mode_t;
 
 static const mode_t S_IRUSR = mode_t(_S_IREAD);     //  read by user
@@ -157,7 +157,6 @@ const lstring& Directory_files::fullName(lstring& fname) const {
     return GetFullPath(fname);
 }
 
-
 #else
 
 #include <unistd.h>
@@ -213,9 +212,26 @@ const char* Directory_files::name() const {
 const lstring& Directory_files::fullName(lstring& fname) const {
     return DirUtil::join(fname, my_baseDir, my_pDirEnt->d_name);
 }
-
-
 #endif
+
+//-------------------------------------------------------------------------------------------------
+// [static]
+bool DirUtil::makeWriteableFile(const char* filePath, struct stat* info) {
+    struct stat tmpStat;
+
+    if (info == nullptr) {
+        info = &tmpStat;
+        if (stat(filePath, info) != 0)
+            return false;
+    }
+#ifdef HAVE_WIN
+    unsigned short mask = _S_IFREG + _S_IWRITE;
+    return _chmod(filePath, info->st_mode | mask) == 0;
+#else
+    size_t mask = S_IFREG + S_IWRITE;
+    return chmod(filePath, info->st_mode | mask) == 0;
+#endif
+}
 
 //-------------------------------------------------------------------------------------------------
 // [static] Extract directory part from path.
@@ -229,17 +245,17 @@ lstring& DirUtil::getDir(lstring& outDir, const lstring& inPath) {
 }
 
 //-------------------------------------------------------------------------------------------------
-// [static]  Extract name part from path.
+// Extract name part from path.
 lstring& DirUtil::getName(lstring& outName, const lstring& inPath) {
-    size_t nameStart = inPath.rfind(SLASH_CHAR) + 1;
-    if (nameStart == 0)
+    size_t nameStart = inPath.rfind(SLASH_CHAR);
+    if (nameStart == std::string::npos)
         outName = inPath;
     else
-        outName = inPath.substr(nameStart);
+        outName = inPath.substr(nameStart + 1);
     return outName;
 }
- 
-// ---------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------------------------------
 // Extract name part from path.
 lstring& DirUtil::removeExtn(lstring& outName, const lstring& inPath) {
     size_t extnPos = inPath.rfind(EXTN_CHAR);
@@ -251,7 +267,7 @@ lstring& DirUtil::removeExtn(lstring& outName, const lstring& inPath) {
 }
 
 //-------------------------------------------------------------------------------------------------
-// [static]  Extract name part from path.
+// Extract name part from path.
 lstring& DirUtil::getExt(lstring& outExt, const lstring& inPath) {
     size_t extPos = inPath.rfind(EXTN_CHAR);
     if (extPos == std::string::npos)
@@ -275,17 +291,17 @@ bool DirUtil::deleteFile(bool dryRun, const char* inPath) {
             setPermission(inPath, S_IWUSR);
         err = remove(inPath);
     }
-    
+
     if (err != 0)
         std::cerr << strerror(errno) << " deleting " << inPath << std::endl;
     else
         std::cerr << "Deleted " << inPath << std::endl;
-    
-    
+
+
     return (err == 0);
 }
 
-/* 
+/*
 // ---------------------------------------------------------------------------
 bool deleteFile(const char* path) {
 
@@ -310,7 +326,7 @@ bool deleteFile(const char* path) {
 bool DirUtil::setPermission(const char* relPath, unsigned permission, bool setAllParts) {
     if (relPath == nullptr || strlen(relPath) <= 1)
         return true;
-    
+
     lstring dir;
     struct stat pathStat;
     int err = stat(relPath, &pathStat);

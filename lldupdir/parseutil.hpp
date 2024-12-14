@@ -45,6 +45,9 @@ public:
     unsigned optionErrCnt = 0;
     unsigned patternErrCnt = 0;
     
+    ParseUtil() noexcept ;
+    // ~ParseUtil();
+
     void showUnknown(const char* argStr);
     std::regex getRegEx(const char* value);
  
@@ -55,6 +58,7 @@ public:
 
     static bool FileMatches(const lstring& inName, const PatternList& patternList, bool emptyResult);
     static const char* convertSpecialChar(const char* inPtr);
+    static std::string& fmtDateTime(string& outTmStr, time_t& now);
     static lstring& getParts(
             lstring& outPart,
             const char* partSelector,
@@ -110,7 +114,6 @@ public:
     }
 };
 
-
 //-------------------------------------------------------------------------------------------------
 // Replace using regular expression
 inline string& replaceRE(string& inOut, const char* findRE, const char* replaceWith) {
@@ -128,7 +131,7 @@ inline string& replaceRE(string& inOut, const char* findRE, const char* replaceW
 
 class Colors {
 public:
-#ifdef HAVE_WIN
+
 #define RED    "\033[01;31m"
 #define GREEN  "\033[01;32m"
 #define YELLOW "\033[01;33m"
@@ -137,16 +140,7 @@ public:
 #define LBLUE  "\033[01;36m"
 #define WHITE  "\033[01;37m"
 #define OFF    "\033[00m"
-#else
-#define RED    "\033[01;31m"
-#define GREEN  "\033[01;32m"
-#define YELLOW "\033[01;33m"
-#define BLUE   "\033[01;34m"
-#define PINK   "\033[01;35m"
-#define LBLUE  "\033[01;36m"
-#define WHITE  "\033[01;37m"
-#define OFF    "\033[00m"
-#endif
+
 
     static string colorize(const char* inStr) {
 #ifdef HAVE_WIN

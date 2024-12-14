@@ -50,7 +50,7 @@
 #pragma once
 
 #include "ll_stdhdr.hpp"
-#include "lstring.hpp"
+
 
 #ifdef HAVE_WIN
     #include <windows.h>
@@ -87,7 +87,7 @@
     #endif
 #else
     const char SLASH_CHAR('/');
-    #include <time.h>
+    #include <sys/fcntl.h>
 #endif
 
 class DirEntry;
@@ -120,7 +120,6 @@ public:
     static const lstring SLASH;     // "/"  linux, or "\\" windows
     static const lstring SLASH2;    // "//" linux, or "\\\\" windows
 
-
 private:
     Directory_files(const Directory_files&);
 
@@ -147,7 +146,15 @@ namespace DirUtil {
  bool deleteFile(bool dryRun, const char* inPath);
  bool setPermission(const char* inPath, unsigned permission, bool setAllParts = false);
  size_t fileLength(const lstring& path);
- bool fileExists(const char* path);
+ bool fileExists(const char* path);bool makeWriteableFile(const char* filePath, struct stat* info);
+inline bool isWriteableFile(const struct stat& info) {
+#ifdef HAVE_WIN
+    size_t mask = _S_IFREG + _S_IWRITE;
+#else
+    size_t mask = S_IFREG + S_IWRITE;
+#endif
+    return ((info.st_mode & mask) == mask);
+}
 
  inline unsigned int minU(unsigned int A, unsigned int B) { return (A<=B) ? A:B; }
 

@@ -1,21 +1,41 @@
 @echo off
 
+set prog=lldupdir
+set devenv=F:\opt\VisualStudio\2022\Preview\Common7\IDE\devenv.exe 
 
 cd lldupdir-ms
+if not exist "%msbuild%" (
+echo Fall back msbuild not found at "%msbuild%"
+set msbuild=F:\opt\VisualStudio\2022\Preview\MSBuild\Current\Bin\MSBuild.exe
+)
+echo "Msbuild=%msbuild%"
 
-@echo Clean up remove x64
-rmdir /s  x64
+cd %prog%-ms
+@echo Clean %proj% 
+rmdir /s x64 2> nul
 
 @echo.
 @echo Build release target
-F:\opt\VisualStudio\2022\Preview\Common7\IDE\devenv.exe lldupdir.sln /Build  "Release|x64"
+@rem %devenv%  %prog%.sln /Build  "Release|x64"
+echo "%msbuild%" %prog%.sln -p:Configuration="Release";Platform=x64 -verbosity:minimal  -detailedSummary:True
+"%msbuild%" %prog%.sln -p:Configuration="Release";Platform=x64 -verbosity:minimal  -detailedSummary:True 
 cd ..
 
+@echo.
+@echo ---- Build done 
+if not exist "%prog%-ms\x64\Release\%prog%.exe" (
+   echo Failed to build %prog%-ms\x64\Release\%prog%.exe
+   goto _end
+)
+
+@echo.
 @echo Copy Release to d:\opt\bin
-copy lldupdir-ms\x64\Release\lldupdir.exe d:\opt\bin\lldupdir.exe
+dir %prog%-ms\x64\Release\%prog%.exe
+copy %prog%-ms\x64\Release\%prog%.exe d:\opt\bin\%prog%.exe
 
 @echo.
 @echo Compare md5 hash
-cmp -h lldupdir-ms\x64\Release\lldupdir.exe d:\opt\bin\lldupdir.exe
-ld -a d:\opt\bin\lldupdir.exe
+cmp -h %prog%-ms\x64\Release\%prog%.exe d:\opt\bin\%prog%.exe
+ld -a -ph %prog%-ms\x64\Release\%prog%.exe d:\opt\bin\%prog%.exe
 
+:_end

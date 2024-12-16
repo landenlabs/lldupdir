@@ -34,7 +34,9 @@
 
 #include "ll_stdhdr.hpp"
 
+#include <iostream>
 #include <regex>
+
 typedef std::vector<std::regex> PatternList;
 
 
@@ -44,9 +46,6 @@ class ParseUtil {
 public:
     unsigned optionErrCnt = 0;
     unsigned patternErrCnt = 0;
-    
-    ParseUtil() noexcept ;
-    // ~ParseUtil();
 
     void showUnknown(const char* argStr);
     std::regex getRegEx(const char* value);
@@ -123,53 +122,23 @@ inline string& replaceRE(string& inOut, const char* findRE, const char* replaceW
     return inOut;
 }
 
-#ifdef HAVE_WIN
-#include <windows.h>
-#include <stdio.h>
-#endif
-
 
 class Colors {
 public:
+    static string colorize(const char* inStr);
 
-#define RED    "\033[01;31m"
-#define GREEN  "\033[01;32m"
-#define YELLOW "\033[01;33m"
-#define BLUE   "\033[01;34m"
-#define PINK   "\033[01;35m"
-#define LBLUE  "\033[01;36m"
-#define WHITE  "\033[01;37m"
-#define OFF    "\033[00m"
-
-
-    static string colorize(const char* inStr) {
-#ifdef HAVE_WIN
-        HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-        DWORD dwMode = 0;
-        GetConsoleMode(hOut, &dwMode);
-        dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-        SetConsoleMode(hOut, dwMode);
-#endif
-        string str(inStr);
-
-        // _x_  where x lowercase, colorize following word
-        replaceRE(str, "_y_(\\w+)", YELLOW "$1" OFF);
-        replaceRE(str, "_r_(\\w+)",    RED "$1" OFF);
-        replaceRE(str, "_g_(\\w+)",  GREEN "$1" OFF);
-        replaceRE(str, "_p_(\\w+)",   PINK "$1" OFF);
-        replaceRE(str, "_lb_(\\w+)", LBLUE "$1" OFF);
-        replaceRE(str, "_w_(\\w+)",  WHITE "$1" OFF);
-
-        // _X_  where X uppercase, colorize until _X_
-        replaceRE(str, "_Y_", YELLOW);
-        replaceRE(str, "_R_", RED);
-        replaceRE(str, "_G_", GREEN);
-        replaceRE(str, "_P_", PINK);
-        replaceRE(str, "_B_", BLUE);
-        replaceRE(str, "_LB_", LBLUE);
-        replaceRE(str, "_W_", WHITE);
-        replaceRE(str, "_X_", OFF);
-        return str;
+    // Requires C++ v17+
+    // Show error in RED
+    template<typename T, typename... Args>
+    static void showError(T first, Args... args) {
+        std::cerr << Colors::colorize("_R_");
+        std::cerr << first;
+        // #ifdef HAVE_WIN
+        //        cerrArgs(args...);
+        // #else
+        ( ( std::cerr << args << " " ), ... );
+        // #endif
+        std::cerr << Colors::colorize("_X_\n");
     }
 };
 

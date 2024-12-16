@@ -38,10 +38,12 @@
 
 // Project files
 #include "ll_stdhdr.hpp"
+#include "signals.hpp"
+#include "parseutil.hpp"
 #include "directory.hpp"
 #include "command.hpp"
 #include "dupscan.hpp"
-#include "parseutil.hpp"
+
 
 #include <fstream>
 #include <iostream>
@@ -72,7 +74,7 @@ static size_t InspectFiles(Command& command, const lstring& dirname) {
         // Probably a pattern, let directory scan do its magic.
     }
 
-    while (directory.more()) {
+    while (!Signals::aborted &&  directory.more()) {
         directory.fullName(fullname);
         if (directory.is_directory()) {
             fileCount += InspectFiles(command, fullname);
@@ -173,6 +175,7 @@ const std::string currentDateTime(time_t& now) {
 
 // ---------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
+    Signals::init();
     ParseUtil parser;
     DupFiles dupFiles;
     Command* commandPtr = &dupFiles;

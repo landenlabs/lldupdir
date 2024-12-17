@@ -12,6 +12,8 @@
 		9ABB64C22CB36E540060FD55 /* command.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9ABB64B92CB36E540060FD55 /* command.cpp */; };
 		9ABB64C32CB36E540060FD55 /* md5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9ABB64BF2CB36E540060FD55 /* md5.cpp */; };
 		9ABB64C42CB36E540060FD55 /* dupscan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9ABB64BB2CB36E540060FD55 /* dupscan.cpp */; };
+		9AFA96102D11BEAD002F76BA /* signals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9AFA960F2D11BEAD002F76BA /* signals.cpp */; };
+		9AFA96112D11BEAD002F76BA /* hashfilethread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9AFA960D2D11BEAD002F76BA /* hashfilethread.cpp */; };
 		B9B44DD71D8F661700782398 /* directory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B9B44DCA1D8F661700782398 /* directory.cpp */; };
 		B9B44DD81D8F661700782398 /* lldupdir.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B9B44DCE1D8F661700782398 /* lldupdir.cpp */; };
 /* End PBXBuildFile section */
@@ -40,7 +42,11 @@
 		9ABB64BE2CB36E540060FD55 /* md5.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = md5.hpp; sourceTree = "<group>"; };
 		9ABB64BF2CB36E540060FD55 /* md5.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = md5.cpp; sourceTree = "<group>"; };
 		9ABB64C02CB36E540060FD55 /* xxhash64.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = xxhash64.hpp; sourceTree = "<group>"; };
-		B9B44DBD1D8F65CD00782398 /* lldupdir */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = lldupdir; path = "/Users/dennislang/opt/projects/projects-xcode/_ll/lldupdir/build/Debug/lldupdir"; sourceTree = "<absolute>"; };
+		9AFA960B2D11BE8C002F76BA /* lldupdir */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = lldupdir; path = "/Users/dennislang/opt/projects/projects-xcode/_ll/lldupdir/build/Debug/lldupdir"; sourceTree = "<absolute>"; };
+		9AFA960C2D11BEAD002F76BA /* hashfilethread.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = hashfilethread.hpp; sourceTree = "<group>"; };
+		9AFA960D2D11BEAD002F76BA /* hashfilethread.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = hashfilethread.cpp; sourceTree = "<group>"; };
+		9AFA960E2D11BEAD002F76BA /* signals.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = signals.hpp; sourceTree = "<group>"; };
+		9AFA960F2D11BEAD002F76BA /* signals.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = signals.cpp; sourceTree = "<group>"; };
 		B9B44DCA1D8F661700782398 /* directory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = directory.cpp; sourceTree = "<group>"; };
 		B9B44DCB1D8F661700782398 /* directory.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = directory.hpp; sourceTree = "<group>"; };
 		B9B44DCE1D8F661700782398 /* lldupdir.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lldupdir.cpp; sourceTree = "<group>"; };
@@ -69,6 +75,10 @@
 		B9B44DBF1D8F65CD00782398 /* lldupdir */ = {
 			isa = PBXGroup;
 			children = (
+				9AFA960C2D11BEAD002F76BA /* hashfilethread.hpp */,
+				9AFA960D2D11BEAD002F76BA /* hashfilethread.cpp */,
+				9AFA960E2D11BEAD002F76BA /* signals.hpp */,
+				9AFA960F2D11BEAD002F76BA /* signals.cpp */,
 				9AB236B22CF8D033007446E8 /* parseutil.hpp */,
 				9AB236B32CF8D033007446E8 /* parseutil.cpp */,
 				9ABB64B82CB36E540060FD55 /* command.hpp */,
@@ -106,7 +116,7 @@
 			);
 			name = lldupdir;
 			productName = lldupdir;
-			productReference = B9B44DBD1D8F65CD00782398 /* lldupdir */;
+			productReference = 9AFA960B2D11BE8C002F76BA /* lldupdir */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -150,6 +160,8 @@
 				9ABB64C12CB36E540060FD55 /* hash.cpp in Sources */,
 				9ABB64C22CB36E540060FD55 /* command.cpp in Sources */,
 				9ABB64C32CB36E540060FD55 /* md5.cpp in Sources */,
+				9AFA96102D11BEAD002F76BA /* signals.cpp in Sources */,
+				9AFA96112D11BEAD002F76BA /* hashfilethread.cpp in Sources */,
 				9AB236B42CF8D033007446E8 /* parseutil.cpp in Sources */,
 				9ABB64C42CB36E540060FD55 /* dupscan.cpp in Sources */,
 				B9B44DD71D8F661700782398 /* directory.cpp in Sources */,

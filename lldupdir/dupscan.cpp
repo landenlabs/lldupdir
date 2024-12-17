@@ -31,6 +31,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "ll_stdhdr.hpp"
+#include "signals.hpp"
 #include "dupscan.hpp"
 #include "directory.hpp"
 
@@ -90,7 +91,7 @@ void DupScan::getFiles(unsigned level, const StringList& baseDirList, const Stri
         for (const lstring& baseDir : baseDirList) {
             Directory_files directory(DirUtil::join(joinBuf, baseDir, nextDir));
 
-            while (directory.more()) {
+            while (!Signals::aborted && directory.more()) {
                 if (! directory.is_directory()) {
                     lstring name(directory.name());
                     lstring fullname;
@@ -99,6 +100,10 @@ void DupScan::getFiles(unsigned level, const StringList& baseDirList, const Stri
                         outFiles.insert(DirUtil::join(joinBuf, nextDir, name));
                     }
                 }
+            }
+            if (Signals::aborted) {
+                outFiles.clear();
+                return;
             }
         }
     }
@@ -112,10 +117,14 @@ void DupScan::getDirs(unsigned level, const StringList& baseDirList, const Strin
             Directory_files directory(DirUtil::join(joinBuf, baseDir, nextDir));
             lstring fullname;
 
-            while (directory.more()) {
+            while (!Signals::aborted && directory.more()) {
                 if (directory.is_directory()) {
                     outDirList.insert(DirUtil::join(joinBuf, nextDir, directory.name()));
                 }
+            }
+            if (Signals::aborted) {
+                outDirList.clear();
+                return;
             }
         }
     }

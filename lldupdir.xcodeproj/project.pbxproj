@@ -31,6 +31,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		9A09E1BE2D1284A4006D9E20 /* lldupdir */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = lldupdir; sourceTree = BUILT_PRODUCTS_DIR; };
 		9AB236B22CF8D033007446E8 /* parseutil.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = parseutil.hpp; sourceTree = "<group>"; };
 		9AB236B32CF8D033007446E8 /* parseutil.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = parseutil.cpp; sourceTree = "<group>"; };
 		9ABB64B82CB36E540060FD55 /* command.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = command.hpp; sourceTree = "<group>"; };
@@ -42,7 +43,6 @@
 		9ABB64BE2CB36E540060FD55 /* md5.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = md5.hpp; sourceTree = "<group>"; };
 		9ABB64BF2CB36E540060FD55 /* md5.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = md5.cpp; sourceTree = "<group>"; };
 		9ABB64C02CB36E540060FD55 /* xxhash64.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = xxhash64.hpp; sourceTree = "<group>"; };
-		9AFA960B2D11BE8C002F76BA /* lldupdir */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = lldupdir; path = "/Users/dennislang/opt/projects/projects-xcode/_ll/lldupdir/build/Debug/lldupdir"; sourceTree = "<absolute>"; };
 		9AFA960C2D11BEAD002F76BA /* hashfilethread.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = hashfilethread.hpp; sourceTree = "<group>"; };
 		9AFA960D2D11BEAD002F76BA /* hashfilethread.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = hashfilethread.cpp; sourceTree = "<group>"; };
 		9AFA960E2D11BEAD002F76BA /* signals.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = signals.hpp; sourceTree = "<group>"; };
@@ -69,6 +69,7 @@
 			isa = PBXGroup;
 			children = (
 				B9B44DBF1D8F65CD00782398 /* lldupdir */,
+				9A09E1BE2D1284A4006D9E20 /* lldupdir */,
 			);
 			sourceTree = "<group>";
 		};
@@ -116,7 +117,7 @@
 			);
 			name = lldupdir;
 			productName = lldupdir;
-			productReference = 9AFA960B2D11BE8C002F76BA /* lldupdir */;
+			productReference = 9A09E1BE2D1284A4006D9E20 /* lldupdir */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -130,6 +131,8 @@
 				TargetAttributes = {
 					B9B44DBC1D8F65CD00782398 = {
 						CreatedOnToolsVersion = 7.3.1;
+						DevelopmentTeam = X7Z43FGG83;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -255,16 +258,26 @@
 		B9B44DC51D8F65CD00782398 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = X7Z43FGG83;
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.landenlabs.lldupdir;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Debug;
 		};
 		B9B44DC61D8F65CD00782398 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = X7Z43FGG83;
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.landenlabs.lldupdir;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Release;
 		};

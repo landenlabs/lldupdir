@@ -143,7 +143,7 @@ void DupScan::compareFiles(unsigned level, const StringList& baseDirList, const 
         if (command.verbose)
             cerr << joinBuf1 << " len=" << fileLen1 << std::endl;
  
-        while (dirIter != baseDirList.end()) {
+        while (!Signals::aborted && dirIter != baseDirList.end()) {
             fileLen2 = fileLength(DirUtil::join(joinBuf2, *dirIter++, file));
 
             if (command.verbose)
@@ -175,7 +175,7 @@ void DupScan::compareFiles(unsigned level, const StringList& baseDirList, const 
             if (command.verbose)
                 cerr << joinBuf1 << " hash=" << hash1 << std::endl;
 
-            while (dirIter != baseDirList.end()) {
+            while (!Signals::aborted && dirIter != baseDirList.end()) {
                 DirUtil::join(joinBuf2, *dirIter++, file);
                 joinBuf2 = command.absOrRel(joinBuf2);
                 HashValue hash2 = XXHash64::compute(joinBuf2); // hashValue = Md5::compute(joinBuf);

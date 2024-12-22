@@ -376,6 +376,9 @@ void DupFiles::printPaths(const IntList& pathListIdx, const std::string& name) {
             if (plIdx != 0) std::cout << separator;
             std::cout << filePath;
         }
+        if (ParseUtil::FileMatches(filePath, delDupPathPatList, false)) {
+            DirUtil::deleteFile(dryRun, filePath);
+        }
     }
 }
 
@@ -383,6 +386,11 @@ void DupFiles::printPaths(const IntList& pathListIdx, const std::string& name) {
 bool DupFiles::end() {
     // typedef lstring HashValue;       // md5
     typedef uint64_t HashValue;         // xxHash64
+
+    //  sameCnt
+    //  diffCnt
+    //  missCnt
+    //  skipCnt
 
     if (justName && ignoreExtn) {
         lstring noExtn;
@@ -395,23 +403,26 @@ bool DupFiles::end() {
         }
 
         for (auto it = noExtnList.cbegin(); it != noExtnList.cend(); it++) {
-            unsigned outCnt = 0;
             if (it->second.size() > 1) {
-
+                sameCnt += it->second.size() - 1;
+                uint outCnt = 0;
                 for (auto itNames = it->second.cbegin(); itNames != it->second.cend(); itNames++) {
                     const IntList& pathListIdx = fileList[*(*itNames)];
-                    if (outCnt == 0) std::cout << preDivider;
-                    if (outCnt++ != 0) std::cout << separator;
+                    if (outCnt++ == 0) 
+                        std::cout << preDivider;
+                    else 
+                        std::cout << separator;
                     printPaths(pathListIdx, *(*itNames));
                 }
+                std::cout << postDivider;
             }
-            if (outCnt != 0) std::cout << postDivider;
         }
 
     } else if (justName) {
         for (auto it = fileList.cbegin(); it != fileList.cend(); it++) {
             const IntList& pathListIdx = it->second;
             if (it->second.size() > 1) {
+                sameCnt += it->second.size() - 1;
                 std::cout << preDivider;
                 printPaths(pathListIdx, it->first);
                 std::cout << postDivider;
@@ -445,7 +456,13 @@ bool DupFiles::end() {
                     if (verbose) {
                         std::cout << (isDup ? preDup : preDiff) << fileHash[fullPath] << " ";
                         print(fullPath, NULL);
-                        // std::cout << endl;
+                        if (isDup) {
+                            sameCnt++;
+                            if (ParseUtil::FileMatches(fullPath, delDupPathPatList, false)) {
+                                DirUtil::deleteFile(dryRun, fullPath);
+                            }
+                        } else 
+                            diffCnt++;
                     } else if (isDup != invert) {
                         hashFileList[hashValue].push_back(plPos);
                     }
@@ -460,9 +477,13 @@ bool DupFiles::end() {
                                 string fullPath = pathList[matchList[mIdx]] + it->first;
                                 if (mIdx != 0) std::cout << separator;
                                 std::cout << fullPath;
+                                sameCnt++;
+                                if (ParseUtil::FileMatches(fullPath, delDupPathPatList, false)) {
+                                    DirUtil::deleteFile(dryRun, fullPath.c_str());
+                                }
                             }
                             std::cout << postDivider;
-                        }
+                        }  
                     }
                 }
             } else if (invert) {
@@ -511,7 +532,8 @@ bool DupFiles::end() {
         // 3. Find duplicate hash
         for (auto hashFileListIter = hashFileList.cbegin(); hashFileListIter != hashFileList.cend(); hashFileListIter++) {
             if ((hashFileListIter->second.size() > 1) != invert) {
-                std::cout << preDivider;
+                sameCnt += hashFileListIter->second.size() - 1;
+                if (showSame) std::cout << preDup;
                 const auto& matchList = hashFileListIter->second;
                 for (unsigned mIdx = 0; mIdx < matchList.size(); mIdx++) {
                     const PathParts& pathParts = *matchList[mIdx];
@@ -520,12 +542,15 @@ bool DupFiles::end() {
                     if (verbose) {
                         std::cout << matchList.size() << " Hash " << hashFileListIter->first << " ";
                         print(fullPath, NULL);
-                    } else {
+                    } else if (showSame) {
                         if (mIdx != 0) std::cout << separator;
                         std::cout << absOrRel(fullPath);
                     }
+                    if (ParseUtil::FileMatches(fullPath, delDupPathPatList, false)) {
+                        DirUtil::deleteFile(dryRun, fullPath);
+                    }
                 }
-                std::cout << postDivider;
+                if (showSame)std::cout << postDivider;
             }
         }
     }
@@ -570,21 +595,21 @@ void Command::showDuplicate(const lstring& filePath1, const lstring& filePath2) 
         if (hardlink) {
             std::cerr << "Hardlink option not yet implemented\n";
             assert(true);  // TODO - implement hardlnk
-            // DirUtil::deleteFile(dryrun, filePath2);
+            // DirUtil::deleteFile(dryRun, filePath2);
             // DirUtil::hardlink(filePath1, filePath2);
         } else if (deleteFiles != Command::None) {
             switch (deleteFiles) {
             case Command::None:
                 break;
             case Command::First:
-                DirUtil::deleteFile(dryrun, filePath1);
+                DirUtil::deleteFile(dryRun, filePath1);
                 break;
             case Command::Second:
-                DirUtil::deleteFile(dryrun, filePath2);
+                DirUtil::deleteFile(dryRun, filePath2);
                 break;
             case Command::Both:
-                DirUtil::deleteFile(dryrun, filePath1);
-                DirUtil::deleteFile(dryrun, filePath2);
+                DirUtil::deleteFile(dryRun, filePath1);
+                DirUtil::deleteFile(dryRun, filePath2);
                 break;
             }
         }

@@ -67,6 +67,8 @@ public:
     PatternList excludeFilePatList;
     PatternList includePathPatList;
     PatternList excludePathPatList;
+    PatternList delDupPathPatList;
+    // PatternList delDifPathPatList;  // not used
 
     bool showFile = false;
     bool verbose = false;
@@ -75,7 +77,7 @@ public:
     bool justName = false;
     bool ignoreExtn = false;
     bool useThreads = false;    // threads slower on physical disks
-    bool dryrun = false;        // -n scan and report but do not delete or hardline. 
+    bool dryRun = false;        // -n scan and report but do not delete or hardline. 
     bool showAbsPath = false;
 
     // -- Duplicate file

@@ -116,6 +116,7 @@ void showHelp(const char* arg0) {
         "   -_y_showDiff           ; Show files that differ\n"
         "   -_y_showMiss           ; Show missing files \n"
         "   -_y_hideDup            ; Don't show duplicate files  \n"
+        "   -_y_showAbs            ; Show absolute file paths  \n"
 
         "   -_y_preDup=<text>      ; Prefix before duplicates, default nothing  \n"
         "   -_y_preDiff=<text>     ; Prefix before differences, default: \"!= \"  \n"
@@ -128,13 +129,15 @@ void showHelp(const char* arg0) {
         "   -_y_log=[first|second]          ; Only show 1st or 2nd file for Dup or Diff \n"
         "   -_y_no                          ; DryRun, show delete but don't do delete \n"
         "   -_y_delete=[first|second|both]  ; If dup or diff, delete 1st, 2nd or both files \n"
+
         "   -_y_threads                     ; Compute file hashes in threads \n"
         "\n"
         "_p_Options (when comparing one dir or 3 or more directories)\n"
         "        Default compares all files for matching length and hash value\n"
-        "   -_y_justName           ; Match duplicate name only, not contents \n"
-        "   -_y_ignoreExtn         ; With -justName, also ignore extension \n"
-        "   -_y_sameName           ; Compare file contents only if same name \n"
+        "   -_y_justName                    ; Match duplicate name only, not contents \n"
+        "   -_y_ignoreExtn                  ; With -justName, also ignore extension \n"
+        "   -_y_all                         ; Find all matches, ignore name \n"
+        "   -_y_delDupPat=pathPat           ; If dup   delete if pattern match \n"
 
         //        "   -ignoreHardlinks   ; \n"
         //        "   -ignoreSoftlinks    ; \n"
@@ -201,12 +204,13 @@ int main(int argc, char* argv[]) {
                     const char* cmdName = cmd + 1;
                     switch (*cmdName) {
                      case 'd':   // delete=None|First|Second|Both
-                        if (parser.validOption("deleteFile", cmdName)) {
+                        if (parser.validOption("deleteFile", cmdName, false)) {
                             if (!Command::getFileTypes(commandPtr->deleteFiles, value)) {
                                 parser.showUnknown(argStr);
                                 std::cerr << "Valid delete types are: first, second or both\n";
                             }
-                        }
+                        } else 
+                            parser.validPattern(commandPtr->delDupPathPatList, value, "delDupPat", cmdName);
                         break;
                     case 'e':   // -excludeFile=<patFile>
                         parser.validPattern(commandPtr->excludeFilePatList, value, "excludeFile", cmdName);
@@ -289,7 +293,7 @@ int main(int argc, char* argv[]) {
                         break;
                     case 'n':   // no action, dry-run
                         std::cerr << "DryRun enabled\n";
-                        commandPtr->dryrun = true;
+                        commandPtr->dryRun = true;
                         break;
 
                     case 's':
@@ -304,7 +308,7 @@ int main(int argc, char* argv[]) {
                         } else if (parser.validOption("showAbs", cmdName, false)) {
                             commandPtr->showAbsPath = true;
                         } else if (parser.validOption("sameName", cmdName, false)) {
-                            commandPtr->sameName = false;
+                            commandPtr->sameName = true;
                         } else if (parser.validOption("simple", cmdName)) {
                             commandPtr->preDup = commandPtr->preDiff = "";
                             commandPtr->separator = " ";
@@ -343,6 +347,7 @@ int main(int argc, char* argv[]) {
             }
         }
 
+        unsigned level = 0;
         time_t startT;
         currentDateTime(startT);
         
@@ -355,38 +360,40 @@ int main(int argc, char* argv[]) {
                 if (extraDirList.size() == 1 && extraDirList[0] == "-") {
                     string filePath;
                     while (std::getline(std::cin, filePath)) {
-                        if (commandPtr->quiet < 1)
-                            std::cerr << "  Files Checked=" << InspectFiles(*commandPtr, filePath) << std::endl;
+                         size_t fileCnt = InspectFiles(*commandPtr, filePath);
+                         if (commandPtr->quiet < 1)
+                            std::cerr << "  Files Checked=" << fileCnt << std::endl;
                     }
                 } else if (commandPtr->ignoreExtn || !commandPtr->sameName || extraDirList.size() != 2) {
                     for (auto const& filePath : extraDirList) {
+                        size_t fileCnt = InspectFiles(*commandPtr, filePath);
                         if (commandPtr->quiet < 1)
-                            std::cerr << "  Files Checked=" << InspectFiles(*commandPtr, filePath) << std::endl;
+                            std::cerr << "  Files Checked=" << fileCnt << std::endl;
                     }
                 } else if (extraDirList.size() == 2) {
                     DupScan dupScan(*commandPtr);
                     StringSet nextDirList;
                     nextDirList.insert("");
-                    unsigned level = 0;
+                  
                     while (!Signals::aborted && dupScan.findDuplicates(level, extraDirList, nextDirList)) {
                         level++;
                     }
 
                     dupScan.done();
-
-                    if (commandPtr->quiet < 2)
-                        std::cerr << Colors::colorize("_G_ +Levels=") << level
-                        << " Dup=" << commandPtr->sameCnt
-                        << " Diff=" << commandPtr->diffCnt
-                        << " Miss=" << commandPtr->missCnt
-                        << " Skip=" << commandPtr->skipCnt
-                        << " Files=" << commandPtr->sameCnt + commandPtr->diffCnt + commandPtr->missCnt + commandPtr->skipCnt
-                        << Colors::colorize("_X_\n");
                 }
             }
 
             commandPtr->end();
         }
+
+        if (commandPtr->quiet < 2)
+            std::cerr << Colors::colorize("_G_ +Levels=") << level
+            << " Dup=" << commandPtr->sameCnt
+            << " Diff=" << commandPtr->diffCnt
+            << " Miss=" << commandPtr->missCnt
+            << " Skip=" << commandPtr->skipCnt
+            << " Files=" << commandPtr->sameCnt + commandPtr->diffCnt + commandPtr->missCnt + commandPtr->skipCnt
+            << Colors::colorize("_X_\n");
 
         time_t endT;
         if (commandPtr->quiet < 2) {

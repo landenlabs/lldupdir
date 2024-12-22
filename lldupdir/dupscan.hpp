@@ -65,6 +65,7 @@ public:
     //
     //    returns - false when no more directories available.
     bool findDuplicates(unsigned level, const StringList& baseDirList, StringSet& subDirList) const;
+    void done();
 
 private:
     void scanFiles(unsigned level, const StringList& baseDirList, const StringSet& nextDirList) const;
@@ -72,8 +73,6 @@ private:
     void getDirs(unsigned level, const StringList& baseDirList, const StringSet& nextDirList, StringSet& outDirList) const;
     void compareFiles(unsigned level, const StringList& baseDirList, const set<lstring>& files) const;
 
-    void showDuplicate(const lstring& filePath1, const lstring& filePath2) const;
-    void showDifferent(const lstring& filePath1, const lstring& filePath2) const;
-    void showMissing(bool have1, const lstring & filePath1, bool have2, const lstring& filePath2) const;
+
 };
 

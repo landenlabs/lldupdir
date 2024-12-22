@@ -70,7 +70,7 @@ static size_t InspectFiles(Command& command, const lstring& dirname) {
             fileCount += command.add(dirname);
             return fileCount;
         }
-    } catch (exception ex) {
+    } catch (const exception& ex) {
         // Probably a pattern, let directory scan do its magic.
     }
 
@@ -128,6 +128,7 @@ void showHelp(const char* arg0) {
         "   -_y_log=[first|second]          ; Only show 1st or 2nd file for Dup or Diff \n"
         "   -_y_no                          ; DryRun, show delete but don't do delete \n"
         "   -_y_delete=[first|second|both]  ; If dup or diff, delete 1st, 2nd or both files \n"
+        "   -_y_threads                     ; Compute file hashes in threads \n"
         "\n"
         "_p_Options (when comparing one dir or 3 or more directories)\n"
         "        Default compares all files for matching length and hash value\n"
@@ -310,6 +311,11 @@ int main(int argc, char* argv[]) {
                             commandPtr->postDivider = "\n";
                         }
                         break;
+                    case 't':
+                        if (parser.validOption("threads", cmdName)) {
+                            commandPtr->useThreads = true;
+                        }
+                        break;
                     case 'q':
                         if (parser.validOption("quiet", cmdName)) {
                             commandPtr->quiet++;
@@ -365,6 +371,8 @@ int main(int argc, char* argv[]) {
                     while (!Signals::aborted && dupScan.findDuplicates(level, extraDirList, nextDirList)) {
                         level++;
                     }
+
+                    dupScan.done();
 
                     if (commandPtr->quiet < 2)
                         std::cerr << Colors::colorize("_G_ +Levels=") << level

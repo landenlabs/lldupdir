@@ -67,7 +67,6 @@ public:
     PatternList excludeFilePatList;
     PatternList includePathPatList;
     PatternList excludePathPatList;
-  
 
     bool showFile = false;
     bool verbose = false;
@@ -75,21 +74,14 @@ public:
     bool sameName = true;
     bool justName = false;
     bool ignoreExtn = false;
-
-    // TODO - not yet implemented
-    bool ignoreHardLinks = false;
-    bool ignoreSoftLinks = false;
-
-    
+    bool useThreads = false;    // threads slower on physical disks
     bool dryrun = false;        // -n scan and report but do not delete or hardline. 
-    bool hardlink = false;      // If dup, hardlink
+    bool showAbsPath = false;
 
     // -- Duplicate file
     bool showSame = true;
     bool showDiff = false;
     bool showMiss = false;
-
-    bool showAbsPath = false;
 
     unsigned quiet = 0;             // 0=show output, 1=don't show dup/diff/miss, 2=suppress all output
     enum FileTypes { None, First, Second, Both };
@@ -108,6 +100,11 @@ public:
     lstring preDup = "== ";
     lstring preMissing = "-- ";
     lstring preDiff = "!= ";
+
+    // TODO - not yet implemented
+    bool ignoreHardLinks = false;
+    bool ignoreSoftLinks = false;
+    bool hardlink = false;      // If dup, hardlink
 
 private:
     lstring none;
@@ -147,6 +144,10 @@ public:
 
     const char* absOrRel(const char* fullPath) const;
     const char* absOrRel(const string& fullPath) const;
+
+    void showDuplicate(const lstring& filePath1, const lstring& filePath2);
+    void showDifferent(const lstring& filePath1, const lstring& filePath2);
+    void showMissing(bool have1, const lstring & filePath1, bool have2, const lstring& filePath2);
 };
 
 

@@ -34,8 +34,7 @@
 #include "command.hpp"
 #include "parseutil.hpp"  // fileMatches
 #include "directory.hpp"
-#include "md5.hpp"
-#include "xxhash64.hpp"
+#include "hasher.hpp"
 
 #include <assert.h>
 #include <fstream>
@@ -44,8 +43,8 @@
 #include <map>
 #include <vector>
 
-bool useThreads = false;
-#include "hashfilethread.hpp"
+
+
 
 #ifdef HAVE_WIN
 #include <direct.h> // _getcwd
@@ -431,7 +430,7 @@ bool DupFiles::end() {
                     // std::cout << pathList[pathListIdx[plIdx]] << it->first << std::endl;
                     lstring fullPath = pathList[pathListIdx[plIdx]] + it->first;
                     // HashValue hashValue = Md5::compute(fullPath);
-                    HashValue hashValue = XXHash64::compute(fullPath);
+                    HashValue hashValue = Hasher::compute(fullPath);
                     hashDups[hashValue] = hashDups[hashValue] + 1;
                     fileHash[fullPath] = hashValue;
                 }
@@ -503,7 +502,7 @@ bool DupFiles::end() {
                     lstring fullPath = pathList[pathParts.pathIdx];
                     fullPath += pathParts.name;
                     // HashValue hashValue = Md5::compute(fullPath);
-                    HashValue hashValue = XXHash64::compute(fullPath);
+                    HashValue hashValue = Hasher::compute(fullPath);
                     hashFileList[hashValue].push_back(&pathParts);
                 }
             }
@@ -552,4 +551,70 @@ bool Command::getFileTypes(Command::FileTypes &fileTypes, const char *str) {
     }
 
     return valid;
+}
+
+
+// ---------------------------------------------------------------------------
+void Command::showDuplicate(const lstring& filePath1, const lstring& filePath2)  {
+    sameCnt++;
+    if (showSame) {
+        std::cout << preDup;
+        if (showFiles == Command::Both || showFiles == Command::First)
+            std::cout << filePath1;
+        if (showFiles == Command::Both)
+            std::cout << separator;
+        if (showFiles == Command::Both || showFiles == Command::Second)
+            std::cout << filePath2;
+        std::cout << postDivider;
+
+        if (hardlink) {
+            std::cerr << "Hardlink option not yet implemented\n";
+            assert(true);  // TODO - implement hardlnk
+            // DirUtil::deleteFile(dryrun, filePath2);
+            // DirUtil::hardlink(filePath1, filePath2);
+        } else if (deleteFiles != Command::None) {
+            switch (deleteFiles) {
+            case Command::None:
+                break;
+            case Command::First:
+                DirUtil::deleteFile(dryrun, filePath1);
+                break;
+            case Command::Second:
+                DirUtil::deleteFile(dryrun, filePath2);
+                break;
+            case Command::Both:
+                DirUtil::deleteFile(dryrun, filePath1);
+                DirUtil::deleteFile(dryrun, filePath2);
+                break;
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+void Command::showDifferent(const lstring& filePath1, const lstring& filePath2)  {
+    diffCnt++;
+    if (showDiff) {
+        std::cout << preDiff;
+        if (showFiles != Command::Second)
+            std::cout << filePath1;
+        if (showFiles != Command::None)
+            std::cout << separator;
+        if (showFiles != Command::First)
+            std::cout << filePath2;
+        std::cout << postDivider;
+    }
+}
+
+// ---------------------------------------------------------------------------
+void Command::showMissing(bool have1, const lstring& filePath1, bool have2, const lstring& filePath2)  {
+    missCnt++;
+    if (showMiss) {
+        std::cout << preMissing;
+        if (have1 != invert)
+            std::cout << filePath1;
+        else
+            std::cout << filePath2;
+        std::cout << postDivider;
+    }
 }

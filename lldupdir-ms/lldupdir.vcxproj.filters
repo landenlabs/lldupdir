@@ -39,6 +39,9 @@
     <ClCompile Include="..\lldupdir\signals.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\lldupdir\hasher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\lldupdir\directory.hpp">
@@ -69,6 +72,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\lldupdir\signals.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lldupdir\hasher.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

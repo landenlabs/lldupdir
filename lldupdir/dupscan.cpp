@@ -34,14 +34,7 @@
 #include "signals.hpp"
 #include "dupscan.hpp"
 #include "directory.hpp"
-
-#ifdef USE_MD5
-#include "md5.hpp"
-typedef lstring HashValue;
-#else
-#include "xxhash64.hpp"
-typedef uint64_t HashValue;
-#endif
+#include "hasher.hpp"
 
 #include <assert.h>
 #include <iostream>
@@ -75,6 +68,13 @@ bool DupScan::findDuplicates(unsigned level, const StringList& baseDirList, Stri
     subDirList.swap(outDirList);
 
     return subDirList.size() > 0;
+}
+
+// ---------------------------------------------------------------------------
+void DupScan::done() {
+    if (command.useThreads) {
+        Hasher::waitForAsync(command);
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -151,11 +151,11 @@ void DupScan::compareFiles(unsigned level, const StringList& baseDirList, const 
 
             if (command.justName) {
                 if (fileLen1 == fileLen2)
-                    showDuplicate(joinBuf1, joinBuf2);
+                    command.showDuplicate(joinBuf1, joinBuf2);
                 else if (fileLen1 != -1 && fileLen2 != -1)
-                    showDifferent(joinBuf1, joinBuf2);
+                    command.showDifferent(joinBuf1, joinBuf2);
                 else
-                    showMissing((fileLen1 != -1), joinBuf1, (fileLen2 != -1), joinBuf2);
+                    command.showMissing((fileLen1 != -1), joinBuf1, (fileLen2 != -1), joinBuf2);
             } else {
                 if (fileLen1 != fileLen2) {
                     matchingLen = false;  // currently only two items in baseDirList, so no need to exit early
@@ -167,98 +167,38 @@ void DupScan::compareFiles(unsigned level, const StringList& baseDirList, const 
             continue;
 
         if (matchingLen) {
-            dirIter = baseDirList.begin();
-            DirUtil::join(joinBuf1, *dirIter++, file);
-            joinBuf1 = command.absOrRel(joinBuf1);
-            HashValue hash1 = XXHash64::compute(joinBuf1);  // hashValue = Md5::compute(joinBuf);
-
-            if (command.verbose)
-                cerr << joinBuf1 << " hash=" << hash1 << std::endl;
-
-            while (!Signals::aborted && dirIter != baseDirList.end()) {
-                DirUtil::join(joinBuf2, *dirIter++, file);
-                joinBuf2 = command.absOrRel(joinBuf2);
-                HashValue hash2 = XXHash64::compute(joinBuf2); // hashValue = Md5::compute(joinBuf);
+            if (command.useThreads) {
+                Hasher::findDupsAsync(command, baseDirList, file);
+            } else {
+                dirIter = baseDirList.begin();
+                DirUtil::join(joinBuf1, *dirIter++, file);
+                joinBuf1 = command.absOrRel(joinBuf1);
+                HashValue hash1 = Hasher::compute(joinBuf1);  // hashValue = Md5::compute(joinBuf);
 
                 if (command.verbose)
-                    cerr << joinBuf2 << " hash=" << hash2 << std::endl;
+                    cerr << joinBuf1 << " hash=" << hash1 << std::endl;
 
-                if (hash1 == hash2) {
-                    showDuplicate(joinBuf1, joinBuf2);
-                } else {
-                    showDifferent(joinBuf1, joinBuf2);
+                while (!Signals::aborted && dirIter != baseDirList.end()) {
+                    DirUtil::join(joinBuf2, *dirIter++, file);
+                    joinBuf2 = command.absOrRel(joinBuf2);
+                    HashValue hash2 = Hasher::compute(joinBuf2); // hashValue = Md5::compute(joinBuf);
+
+                    if (command.verbose)
+                        cerr << joinBuf2 << " hash=" << hash2 << std::endl;
+
+                    if (hash1 == hash2) {
+                        command.showDuplicate(joinBuf1, joinBuf2);
+                    } else {
+                        command.showDifferent(joinBuf1, joinBuf2);
+                    }
                 }
             }
         } else {
             if (fileLen1 != -1 && fileLen2 != -1)
-                showDifferent(joinBuf1, joinBuf2);
+                command.showDifferent(joinBuf1, joinBuf2);
             else
-                showMissing((fileLen1 != -1), joinBuf1, (fileLen2 != -1), joinBuf2);
+                command.showMissing((fileLen1 != -1), joinBuf1, (fileLen2 != -1), joinBuf2);
         }
     }
 }
 
-// ---------------------------------------------------------------------------
-void DupScan::showDuplicate(const lstring& filePath1, const lstring& filePath2) const {
-    command.sameCnt++;
-    if (command.showSame) {
-        std::cout << command.preDup;
-        if (command.showFiles == Command::Both || command.showFiles == Command::First)
-            std::cout << filePath1;
-        if (command.showFiles == Command::Both)
-            std::cout << command.separator;
-        if (command.showFiles == Command::Both || command.showFiles == Command::Second)
-            std::cout << filePath2;
-        std::cout << command.postDivider;
-        
-        if (command.hardlink) {
-            std::cerr << "Hardlink option not yet implemented\n";
-            assert(true);  // TODO - implement hardlnk
-            // DirUtil::deleteFile(command.dryrun, filePath2);
-            // DirUtil::hardlink(filePath1, filePath2);
-        } else if (command.deleteFiles != Command::None) {
-            switch (command.deleteFiles) {
-            case Command::None:
-                break;
-            case Command::First:
-                DirUtil::deleteFile(command.dryrun, filePath1);
-                break;
-            case Command::Second:
-                DirUtil::deleteFile(command.dryrun, filePath2);
-                break;
-            case Command::Both:
-                DirUtil::deleteFile(command.dryrun, filePath1);
-                DirUtil::deleteFile(command.dryrun, filePath2);
-                break;
-            }
-        }
-    }
-}
-
-// ---------------------------------------------------------------------------
-void DupScan::showDifferent(const lstring& filePath1, const lstring& filePath2) const {
-    command.diffCnt++;
-    if (command.showDiff) {
-        std::cout << command.preDiff;
-        if (command.showFiles != Command::Second)
-            std::cout << filePath1;
-        if (command.showFiles != Command::None)
-            std::cout << command.separator;
-        if (command.showFiles != Command::First)
-            std::cout << filePath2;
-        std::cout << command.postDivider;
-    }
-}
-
-// ---------------------------------------------------------------------------
-void DupScan::showMissing(bool have1, const lstring& filePath1, bool have2, const lstring& filePath2) const {
-    command.missCnt++;
-    if (command.showMiss) {
-        std::cout << command.preMissing;
-        if (have1 != command.invert)
-            std::cout << filePath1;
-        else
-            std::cout << filePath2;
-        std::cout << command.postDivider;
-    }
-}

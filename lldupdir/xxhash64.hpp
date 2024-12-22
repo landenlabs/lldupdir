@@ -134,13 +134,13 @@ public:
         return hasher.hash();
     }
 
-    static uint64_t compute(const char* filePath, size_t maxBytes = std::numeric_limits<size_t>::max())  {
+    static uint64_t compute(const char* filePath, char* buffer, uint sBufSize, size_t maxBytes = std::numeric_limits<size_t>::max())  {
         XXHash64 xxHasher(0);
         std::ifstream in(filePath, ios::binary | ios::in);
 
-        const uint sBufSize = 4096 * 16;
-        static std::vector<char> vBuffer(sBufSize);
-        char* buffer = (char*)vBuffer.data();
+        // const uint sBufSize = 4096 * 16;
+        // static std::vector<char> vBuffer(sBufSize);
+        // char* buffer = (char*)vBuffer.data();
 
         size_t pos = 0;
         size_t rlen = sBufSize;

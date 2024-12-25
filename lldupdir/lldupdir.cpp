@@ -88,7 +88,7 @@ static size_t InspectFiles(Command& command, const lstring& dirname) {
 
 // ---------------------------------------------------------------------------
 void showHelp(const char* arg0) {
-    const char* helpMsg = "  Dennis Lang v2.4 (landenlabs.com) " __DATE__ "\n\n"
+    const char* helpMsg = "  Dennis Lang v2.5 (landenlabs.com) " __DATE__ "\n\n"
         "_p_Des: 'Find duplicate files by comparing length, hash value and optional name. \n"
         "_p_Use: lldupdir [options] directories...   or  files\n"
         "\n"
@@ -323,7 +323,7 @@ int main(int argc, char* argv[]) {
                     case 'q':
                         if (parser.validOption("quiet", cmdName)) {
                             commandPtr->quiet++;
-                            commandPtr->showFile = commandPtr->showDiff = commandPtr->showMiss = false;
+                            commandPtr->showSame = commandPtr->showFile = commandPtr->showDiff = commandPtr->showMiss = false;
                         }
                         break;
                     case 'v':

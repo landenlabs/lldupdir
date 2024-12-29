@@ -41,6 +41,10 @@
     <ClInclude Include="..\lldupdir\parseutil.hpp" />
     <ClInclude Include="..\lldupdir\signals.hpp" />
     <ClInclude Include="..\lldupdir\xxhash64.hpp" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="lldupdir.rc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

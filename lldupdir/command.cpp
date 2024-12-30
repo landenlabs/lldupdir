@@ -284,8 +284,22 @@ bool Command::validFile(const lstring& name, const lstring& fullname) {
        !ParseUtil::FileMatches(fullname, excludePathPatList, false) &&
        ParseUtil::FileMatches(fullname, includePathPatList, true));
 
-    if (! isValid)
+    if (! isValid) {
         skipCnt++;
+        
+        if (verbose) {
+            std::cerr << "Skipped:" << fullname;
+            if (ParseUtil::FileMatches(name, excludeFilePatList, false))
+                cerr << " exclude";
+            if (!ParseUtil::FileMatches(name, includeFilePatList, true))
+                cerr << " include";
+            if (ParseUtil::FileMatches(fullname, excludePathPatList, false))
+                cerr << " Exclude";
+            if (!ParseUtil::FileMatches(fullname, includePathPatList, true))
+                cerr << " Include";
+            cerr << std::endl;
+        }
+    }
     return isValid;
 }
 

@@ -31,7 +31,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		9A09E1BE2D1284A4006D9E20 /* lldupdir */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = lldupdir; sourceTree = BUILT_PRODUCTS_DIR; };
+		9A09E1BE2D1284A4006D9E20 /* lldupdir */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = lldupdir; path = "/Users/dennislang/opt/projects/projects-xcode/_ll/lldupdir/build/Debug/lldupdir"; sourceTree = "<absolute>"; };
 		9AB236B22CF8D033007446E8 /* parseutil.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = parseutil.hpp; sourceTree = "<group>"; };
 		9AB236B32CF8D033007446E8 /* parseutil.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = parseutil.cpp; sourceTree = "<group>"; };
 		9ABB64B82CB36E540060FD55 /* command.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = command.hpp; sourceTree = "<group>"; };
@@ -69,7 +69,6 @@
 			isa = PBXGroup;
 			children = (
 				B9B44DBF1D8F65CD00782398 /* lldupdir */,
-				9A09E1BE2D1284A4006D9E20 /* lldupdir */,
 			);
 			sourceTree = "<group>";
 		};

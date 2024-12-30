@@ -118,7 +118,8 @@ void DupScan::getDirs(unsigned level, const StringList& baseDirList, const Strin
             lstring fullname;
 
             while (!Signals::aborted && directory.more()) {
-                if (directory.is_directory()) {
+                directory.fullName(fullname);
+                if (directory.is_directory() && command.validFile(directory.name(), fullname)) {
                     outDirList.insert(DirUtil::join(joinBuf, nextDir, directory.name()));
                 }
             }

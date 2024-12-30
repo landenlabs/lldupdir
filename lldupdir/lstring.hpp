@@ -11,7 +11,7 @@
 //
 // ----- License ----
 //
-// Copyright (c) 2024  Dennis Lang
+// Copyright (c) 2024 Dennis Lang
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,9 @@
 
 
 #include <string>
+#include <algorithm>
+#include <regex>        // ReplaceAll using regex
+
 
 // Enhanced string class
 class lstring : public std::string {
@@ -86,6 +89,16 @@ public:
         this->assign(rhs);
         return *this;
     }
+
+    lstring& toLower() {
+        transform(begin(), end(), begin(),::tolower);
+        return *this;
+    }
+    lstring& toUpper() {
+        transform(begin(), end(), begin(),::toupper);
+        return *this;
+    }
+
 };
 
 
@@ -103,12 +116,35 @@ inline lstring operator+ (const lstring& lhs, const char*   rhs) {
 }
 
 // ---------------------------------------------------------------------------
-// Replace all occurrences of 'search' with 'replace'
-inline const lstring& ReplaceAll(lstring& subject, const lstring& search, const lstring& replace) {
+// Replace all matches of 'search' with 'replace'
+inline const lstring& ReplaceAll(lstring& subject,
+    const lstring& search,
+    const lstring& replace) {
     size_t pos = 0;
     while ((pos = subject.find(search, pos)) != lstring::npos) {
         subject.replace(pos, search.length(), replace);
         pos += replace.length();
     }
+    return subject;
+}
+
+inline const lstring& ReplaceAll(lstring& subject,
+    const char* search,
+    const char* replace) {
+    size_t pos = 0;
+    size_t searchLen = strlen(search);
+    size_t replaceLen = strlen(replace);
+    while (( pos = subject.find(search, pos) ) != lstring::npos) {
+        subject.replace(pos, searchLen, replace);
+        pos += replaceLen;
+    }
+    return subject;
+}
+
+inline const lstring& ReplaceAll(lstring& subject,
+    const std::regex & searchRE,
+    const lstring& replace) {
+    std::string result = std::regex_replace(subject, searchRE, replace);
+    subject = result;
     return subject;
 }

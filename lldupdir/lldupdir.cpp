@@ -107,6 +107,13 @@ void showHelp(const char* arg0) {
         "   -_y_IncludePath=<pathPattern>   ; -Inc=*/code/*.java \n"
         "   -_y_ExcludePath=<pathPattern>   ; -Exc=*/bin/* -Exe=*/build/* \n"
 #endif
+        "\n"
+        "   -_y_regex                       ; Use regex pattern not DOS pattern \n"
+        "   NOTE - Default DOS pattern converts * to .*, . to [.] and ? to . \n "
+        "          If using -_y_regex specify before pattern options\n"
+        "   Example to ignore all dot directories and files: \n"
+        "          -_y_regex -_y_exclude=\"[.].*\" \n"
+        "\n"
         "   -verbose \n"
         "   -quiet \n"
 
@@ -148,9 +155,11 @@ void showHelp(const char* arg0) {
         "   lldupdir  -_y_showMiss -_y_showDiff dir1 dir2/subdir  \n"
         "   lldupdir  -_y_hideDup -_y_showMiss -_y_showDiff dir1 dir2/subdir  \n"
 #ifdef HAVE_WIN
-        "   lldupdir -_y_Exc=*\\\\.git\\\\* -_y_exc=*.exe -_y_exc=*.zip -_y_hideDup -_y_showMiss   dir1 dir2/subdir  \n"
+        "   lldupdir -_y_Exc=*\\\\.git  -_y_exc=*.exe -_y_exc=*.zip -_y_hideDup -_y_showMiss   dir1 dir2/subdir  \n"
+        "   lldupdir -_y_exc=.git -_y_exc=.cs -_y_exc=*.exe -_y_exc=*.zip -_y_hideDup -_y_showMiss   dir1 dir2/subdir  \n"
 #else
-        "   lldupdir -_y_Exc=\\*/.git/\\* -_y_exc=\\*.exe -_y_hideDup -_y_showMiss   dir1 dir2/subdir  \n"
+        "   lldupdir -_y_Exc=\\*/.git -_y_exc=\\*.exe -_y_hideDup -_y_showMiss   dir1 dir2/subdir  \n"
+        "   lldupdir -_y_exc=.git -_y_exc=\\*.exe -_y_hideDup -_y_showMiss   dir1 dir2/subdir  \n"
 #endif
         "\n"
         "  Find file matches by matching hash value, slower than above, 1 or three or more dirs \n"
@@ -295,7 +304,9 @@ int main(int argc, char* argv[]) {
                         std::cerr << "DryRun enabled\n";
                         commandPtr->dryRun = true;
                         break;
-
+                    case 'r':   // -regex
+                        parser.unixRegEx = parser.validOption("regex", cmdName);
+                        break;
                     case 's':
                         if (parser.validOption("showAll", cmdName, false)) {
                             commandPtr->showSame = commandPtr->showDiff = commandPtr->showMiss = true;

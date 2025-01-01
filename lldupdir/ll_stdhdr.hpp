@@ -32,7 +32,6 @@
 
 #pragma once
 
-
 typedef unsigned short  UShort;
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -46,4 +45,4 @@ typedef unsigned short  UShort;
 
 #include "lstring.hpp"
 
-using namespace std;
+using namespace std;        // use after including c++ headers

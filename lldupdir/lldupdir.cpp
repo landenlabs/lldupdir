@@ -1,6 +1,6 @@
 //-------------------------------------------------------------------------------------------------
 //
-//  lldupdir      Feb-2024       Dennis Lang
+//  lldupdir      Dec-2024       Dennis Lang
 //
 //  Find duplicate files - similar to lldup but faster for parallel dir paths. 
 //

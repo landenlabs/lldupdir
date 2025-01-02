@@ -287,21 +287,23 @@ lstring& DirUtil::getExt(lstring& outExt, const lstring& inPath) {
 // [static] Delete file
 bool DirUtil::deleteFile(bool dryRun, const char* inPath) {
     if (dryRun) {
-        std::cerr << "Would delete " << inPath << std::endl;
+        std::cerr << "\nWould delete " << inPath << std::endl;
         return true;
     }
 
     int err = remove(inPath);
     if (err != 0) {
-        if (errno == EPERM || errno == EACCES)
+        err = errno;
+        if (errno == EPERM || errno == EACCES) {
             setPermission(inPath, S_IWUSR);
-        err = remove(inPath);
+            err = remove(inPath);
+        }
     }
 
     if (err != 0)
-        std::cerr << strerror(errno) << " deleting " << inPath << std::endl;
+        std::cerr << endl << strerror(errno) << " Failed deleting " << inPath << std::endl;
     else
-        std::cerr << "Deleted " << inPath << std::endl;
+        std::cerr << endl << "Deleted " << inPath << std::endl;
 
 
     return (err == 0);

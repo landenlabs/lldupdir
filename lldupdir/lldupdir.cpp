@@ -270,6 +270,7 @@ int main(int argc, char* argv[]) {
                     case 'a':
                         if (parser.validOption("all", cmdName)) {
                             commandPtr->sameName = false;
+                            commandPtr->allFiles = true;
                         }
                         break;
                     case 'f': // duplicated files
@@ -368,6 +369,13 @@ int main(int argc, char* argv[]) {
         if (commandPtr->begin(extraDirList)) {
 
             if (parser.patternErrCnt == 0 && parser.optionErrCnt == 0 && extraDirList.size() != 0) {
+                if (commandPtr->ignoreExtn || !commandPtr->sameName || commandPtr->allFiles) {
+                    if (commandPtr->deleteFiles != Command::None && commandPtr->delDupPathPatList.empty()) {
+                        Colors::showError("Use -delDupPat=<pattern> instead of -delete=first|second");
+                        return 0;
+                    }
+                }
+                
                 if (extraDirList.size() == 1 && extraDirList[0] == "-") {
                     string filePath;
                     while (std::getline(std::cin, filePath)) {
@@ -375,7 +383,7 @@ int main(int argc, char* argv[]) {
                          if (commandPtr->quiet < 1)
                             std::cerr << "  Files Checked=" << fileCnt << std::endl;
                     }
-                } else if (commandPtr->ignoreExtn || !commandPtr->sameName || extraDirList.size() != 2) {
+                } else if (commandPtr->ignoreExtn || !commandPtr->sameName || commandPtr->allFiles) {
                     for (auto const& filePath : extraDirList) {
                         size_t fileCnt = InspectFiles(*commandPtr, filePath);
                         if (commandPtr->quiet < 1)

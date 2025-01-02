@@ -74,6 +74,7 @@ public:
     bool verbose = false;
     bool invert  = false;
     bool sameName = true;
+    bool allFiles = false;      // slow scan, ignores path comoparison
     bool justName = false;
     bool ignoreExtn = false;
     bool useThreads = false;    // threads slower on physical disks

@@ -131,24 +131,34 @@ void DupScan::getDirs(unsigned level, const StringList& baseDirList, const Strin
     }
 }
 
+bool showIt = false;
+template <typename TT>
+void showValue(const lstring& path, const char* tag, TT value) {
+    if (showIt) {
+        if (value != 0 && value != -1)
+            cerr << tag << value << " " << path << std::endl;
+        else
+            cerr << tag << "none " << path << std::endl;
+    }
+}
+
 // ---------------------------------------------------------------------------
 void DupScan::compareFiles(unsigned level, const StringList& baseDirList, const StringSet& files) const {
     lstring joinBuf1, joinBuf2;
-
+    showIt = command.verbose;   // hack
+    
     for (const lstring& file : files) {
         StringList::const_iterator dirIter = baseDirList.begin();
         size_t fileLen1 = fileLength(DirUtil::join(joinBuf1, *dirIter++, file));
         size_t fileLen2 = 0;
         bool matchingLen = true;
 
-        if (command.verbose)
-            cerr << joinBuf1 << " len=" << fileLen1 << std::endl;
+        showValue(joinBuf1, " len1=", fileLen1);
  
         while (!Signals::aborted && dirIter != baseDirList.end()) {
             fileLen2 = fileLength(DirUtil::join(joinBuf2, *dirIter++, file));
 
-            if (command.verbose)
-                cerr << joinBuf2 << " len=" << fileLen2 << std::endl;
+            showValue(joinBuf2, " len2=", fileLen2);
 
             if (command.justName) {
                 if (fileLen1 == fileLen2)
@@ -164,6 +174,9 @@ void DupScan::compareFiles(unsigned level, const StringList& baseDirList, const 
             }
         }
 
+        if (fileLen1 == -1 && fileLen2 == -1)
+            continue; // both file paths are missing
+        
         if (command.justName)
             continue;
 
@@ -176,16 +189,14 @@ void DupScan::compareFiles(unsigned level, const StringList& baseDirList, const 
                 joinBuf1 = command.absOrRel(joinBuf1);
                 HashValue hash1 = Hasher::compute(joinBuf1);  // hashValue = Md5::compute(joinBuf);
 
-                if (command.verbose)
-                    cerr << joinBuf1 << " hash=" << hash1 << std::endl;
+                showValue(joinBuf1, " hash1=", hash1);
 
                 while (!Signals::aborted && dirIter != baseDirList.end()) {
                     DirUtil::join(joinBuf2, *dirIter++, file);
                     joinBuf2 = command.absOrRel(joinBuf2);
                     HashValue hash2 = Hasher::compute(joinBuf2); // hashValue = Md5::compute(joinBuf);
 
-                    if (command.verbose)
-                        cerr << joinBuf2 << " hash=" << hash2 << std::endl;
+                    showValue(joinBuf2, " hash2=", hash2);
 
                     if (hash1 == hash2) {
                         command.showDuplicate(joinBuf1, joinBuf2);

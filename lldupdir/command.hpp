@@ -91,10 +91,10 @@ public:
     FileTypes showFiles = Both;
     FileTypes deleteFiles= None;
     
-    unsigned sameCnt = 0;
-    unsigned diffCnt = 0;
-    unsigned missCnt = 0;
-    unsigned skipCnt = 0;       // exclude and include filters rejected file.
+    size_t sameCnt = 0;
+    size_t diffCnt = 0;
+    size_t missCnt = 0;
+    size_t skipCnt = 0;       // exclude and include filters rejected file.
 
     lstring separator = ", ";
     lstring preDivider = "";

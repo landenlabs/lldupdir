@@ -335,7 +335,77 @@ bool deleteFile(const char* path) {
 }
 */
 
+#ifdef HAVE_WIN
 
+bool getFileInfo(const char* filePath, size_t& id, size_t& nLinks) {
+    bool okay = false;
+    LARGE_INTEGER fileId;
+    fileId.QuadPart = 0;
+
+    BY_HANDLE_FILE_INFORMATION ByHandleFileInformation;
+    HANDLE fileHnd =
+        CreateFile(filePath, FILE_READ_ATTRIBUTES, 7, 0, OPEN_EXISTING, FILE_FLAG_NO_BUFFERING, 0);
+    if (fileHnd != INVALID_HANDLE_VALUE)
+    {
+        if (GetFileInformationByHandle(fileHnd, &ByHandleFileInformation))
+        {
+            nLinks = ByHandleFileInformation.nNumberOfLinks;
+            fileId.LowPart = ByHandleFileInformation.nFileIndexLow;
+            fileId.HighPart = ByHandleFileInformation.nFileIndexHigh;
+            id = (size_t)fileId.QuadPart;
+            okay = true;
+        }
+        ::CloseHandle(fileHnd);
+    }
+    return okay;
+}
+
+LinkStatus DirUtil::hardlink(bool dryRun, const char* masterPath, const char* linkPath) {
+    LinkStatus status = dryRun ? DRYRUN : FAIL_LINK;
+
+    size_t id1, id2;
+    size_t links1, links2;
+    bool statOk = getFileInfo(masterPath, id1, links1) && getFileInfo(linkPath, id2, links2);
+
+    if (statOk && links1 > 0 && id1 == id2) {
+        if (dryRun)
+            std::cerr << "Linked already: << " << masterPath << " " << linkPath << std::endl;
+        linkCnts.already++;
+        return ALREADY;
+    }
+
+    if (!dryRun) {
+        lstring tmpName = linkPath;
+        tmpName += BACKUP_SUFFIX;
+        if (::rename(linkPath, tmpName) == 0) {
+            int statusCode = ! MoveFileEx(masterPath, linkPath, MOVEFILE_CREATE_HARDLINK);
+            // int statusCode = ::link(masterPath, linkPath);
+            if (statusCode == 0) {
+                status = DirUtil::deleteFile(dryRun, tmpName) ? DONE : FAIL_DEL_BACKUP;
+            } else {
+                int error = errno;
+                // std::cerr << "Link error: << " << strerror(error) << " on " << masterPath << " " << linkPath << std::endl;
+                statusCode = ::rename(tmpName, linkPath);
+                status = FAIL_LINK;
+                errno = error;
+            }
+        } else {
+            // int error = errno;
+            // std::cerr << "Link rename error: << " << strerror(error) << " on " << masterPath << " " << linkPath << std::endl;
+            status = FAIL_BACKUP;
+        }
+
+        if (status == DONE)
+            linkCnts.completed++;
+        else
+            linkCnts.failed++;
+
+    } else {
+        std::cerr << "Would link " << masterPath << " and " << linkPath << std::endl;
+    }
+    return status;
+}
+#else
 LinkStatus DirUtil::hardlink(bool dryRun, const char* masterPath, const char* linkPath) {
     LinkStatus status = dryRun ? DRYRUN : FAIL_LINK;
     
@@ -396,7 +466,7 @@ LinkStatus DirUtil::hardlink(bool dryRun, const char* masterPath, const char* li
     }
     return status;
 }
- 
+#endif
 
 //-------------------------------------------------------------------------------------------------
 // [static] Set permission on relative path file and directories.

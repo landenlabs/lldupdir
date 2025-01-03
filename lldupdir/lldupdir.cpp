@@ -70,7 +70,7 @@ static size_t InspectFiles(Command& command, const lstring& dirname) {
             fileCount += command.add(dirname);
             return fileCount;
         }
-    } catch (const exception& ex) {
+    } catch (const exception& ignore) {
         // Probably a pattern, let directory scan do its magic.
     }
 

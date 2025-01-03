@@ -104,12 +104,12 @@ void Hasher::findDupsAsync(Command& command, const StringList& baseDirList, cons
     anyFinishedGroups(command);
     while (threadCnt > MAX_THREADS || (threadCnt > 0 && (threadCnt + baseDirList.size()) > MAX_THREADS)) {
         // cerr << "Waiting, threadCnt=" << threadCnt << std::endl;
-        lock1.try_lock_shared_for(std::chrono::seconds(1));
+        (void) lock1.try_lock_shared_for(std::chrono::seconds(1));
         // cerr << "Resume, threadCnt=" << threadCnt << std::endl;
         // anyFinishedGroups(command);
     }
 
-    lock1.try_lock_shared();
+    (void) lock1.try_lock_shared();
     for (StringList::const_iterator dirIter = baseDirList.begin(); dirIter != baseDirList.end(); dirIter++) {
         DirUtil::join(joinBuf1, *dirIter, fileStr);
         joinBuf1 = command.absOrRel(joinBuf1);
@@ -124,7 +124,7 @@ void Hasher::waitForAsync(Command& command) {
         // std::cerr << "waiting for all threads to finish, cnt=" << threadCnt << std::endl;
         anyFinishedGroups(command);
         if (threadCnt != 0) 
-            lock1.try_lock_shared_for(std::chrono::seconds(1));
+            (void)lock1.try_lock_shared_for(std::chrono::seconds(1));
     }
     // std::cerr << "Done using " << MAX_THREADS << " threads\n";
 }

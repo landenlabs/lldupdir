@@ -135,33 +135,44 @@ private:
 };
 
 enum DIR_TYPES { IS_FILE, IS_DIR_BEG, IS_DIR_END };
+enum LinkStatus { DRYRUN, ALREADY, DONE, FAIL_BACKUP, FAIL_LINK, FAIL_RESTORE, FAIL_DEL_BACKUP };
 
 namespace DirUtil {
- lstring& getDir(lstring& outName, const lstring& inPath);
- lstring& getName(lstring& outName, const lstring& inPath);
- lstring& getExt(lstring& outExt, const lstring& inPath);
- lstring& removeExtn(lstring& outName, const lstring& inPath);
- bool deleteFile(bool dryRun, const char* inPath);
- bool setPermission(const char* inPath, unsigned permission, bool setAllParts = false);
- size_t fileLength(const lstring& path);
- bool fileExists(const char* path);bool makeWriteableFile(const char* filePath, struct stat* info);
-inline bool isWriteableFile(const struct stat& info) {
-#ifdef HAVE_WIN
-    size_t mask = _S_IFREG + _S_IWRITE;
-#else
-    size_t mask = S_IFREG + S_IWRITE;
-#endif
-    return ((info.st_mode & mask) == mask);
-}
+    lstring& getDir(lstring& outName, const lstring& inPath);
+    lstring& getName(lstring& outName, const lstring& inPath);
+    lstring& getExt(lstring& outExt, const lstring& inPath);
+    lstring& removeExtn(lstring& outName, const lstring& inPath);
+    bool deleteFile(bool dryRun, const char* inPath);
+    bool setPermission(const char* inPath, unsigned permission, bool setAllParts = false);
+    size_t fileLength(const lstring& path);
+    bool fileExists(const char* path);bool makeWriteableFile(const char* filePath, struct stat* info);
 
- inline unsigned int minU(unsigned int A, unsigned int B) { return (A<=B) ? A:B; }
+    LinkStatus hardlink(bool dryRun, const char* masterPath, const char* linkPath);
+    void showLink(LinkStatus status, const char* masterPath, const char* linkPath);
+    struct LinkCnts {
+        unsigned int already;
+        unsigned int completed;
+        unsigned int failed;
+    };
+    LinkCnts getLinkCnts();
 
- // Utility to join directory and name and replace any double slashes with a single slash.
-inline const lstring& join(lstring& outPath, const char* inDir, const char* inName, unsigned int pathOff = 0) {
-     // return realpath(fname.c_str(), my_fullname) or   GetFullPath(fname);
-     return ReplaceAll(( outPath = lstring(inDir+pathOff) + Directory_files::SLASH + inName ), Directory_files::SLASH2, Directory_files::SLASH);
- }
-inline const lstring& join(lstring& outPath, lstring& inDir, const char* inName) {
-     return ReplaceAll(( outPath = inDir + Directory_files::SLASH + inName ), Directory_files::SLASH2, Directory_files::SLASH);
- }
+    inline bool isWriteableFile(const struct stat& info) {
+    #ifdef HAVE_WIN
+        size_t mask = _S_IFREG + _S_IWRITE;
+    #else
+        size_t mask = S_IFREG + S_IWRITE;
+    #endif
+        return ((info.st_mode & mask) == mask);
+    }
+
+    inline unsigned int minU(unsigned int A, unsigned int B) { return (A<=B) ? A:B; }
+
+    // Utility to join directory and name and replace any double slashes with a single slash.
+    inline const lstring& join(lstring& outPath, const char* inDir, const char* inName, unsigned int pathOff = 0) {
+         // return realpath(fname.c_str(), my_fullname) or   GetFullPath(fname);
+         return ReplaceAll(( outPath = lstring(inDir+pathOff) + Directory_files::SLASH + inName ), Directory_files::SLASH2, Directory_files::SLASH);
+    }
+    inline const lstring& join(lstring& outPath, lstring& inDir, const char* inName) {
+         return ReplaceAll(( outPath = inDir + Directory_files::SLASH + inName ), Directory_files::SLASH2, Directory_files::SLASH);
+    }
 }

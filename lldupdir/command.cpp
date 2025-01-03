@@ -607,10 +607,9 @@ void Command::showDuplicate(const lstring& filePath1, const lstring& filePath2) 
         std::cout << postDivider;
 
         if (hardlink) {
-            std::cerr << "Hardlink option not yet implemented\n";
-            assert(true);  // TODO - implement hardlnk
-            // DirUtil::deleteFile(dryRun, filePath2);
-            // DirUtil::hardlink(filePath1, filePath2);
+            LinkStatus status = DirUtil::hardlink(dryRun, filePath1, filePath2);
+            if (verbose)
+                DirUtil::showLink(status, filePath1, filePath2);
         } else if (deleteFiles != Command::None) {
             switch (deleteFiles) {
             case Command::None:
@@ -632,6 +631,8 @@ void Command::showDuplicate(const lstring& filePath1, const lstring& filePath2) 
 
 // ---------------------------------------------------------------------------
 void Command::showDifferent(const lstring& filePath1, const lstring& filePath2)  {
+    // TODO - add ability to delete different files, similar to dup files
+    
     diffCnt++;
     if (showDiff) {
         std::cout << preDiff;
@@ -647,6 +648,8 @@ void Command::showDifferent(const lstring& filePath1, const lstring& filePath2) 
 
 // ---------------------------------------------------------------------------
 void Command::showMissing(bool have1, const lstring& filePath1, bool have2, const lstring& filePath2)  {
+    // TODO - add ability to delete different files, similar to dup files
+    
     missCnt++;
     if (showMiss) {
         std::cout << preMissing;

@@ -136,7 +136,7 @@ void showHelp(const char* arg0) {
         "   -_y_log=[first|second]          ; Only show 1st or 2nd file for Dup or Diff \n"
         "   -_y_no                          ; DryRun, show delete but don't do delete \n"
         "   -_y_delete=[first|second|both]  ; If dup or diff, delete 1st, 2nd or both files \n"
-
+        "   -_y_link                        ; Hard link duplicates \n"
         "   -_y_threads                     ; Compute file hashes in threads \n"
         "\n"
         "_p_Options (when comparing one dir or 3 or more directories)\n"
@@ -297,9 +297,10 @@ int main(int argc, char* argv[]) {
                         }
                         break;
                     case 'j':
-                        if (parser.validOption("justName", cmdName)) {
-                            commandPtr->justName = true;
-                        }
+                        commandPtr->justName = parser.validOption("justName", cmdName);
+                        break;
+                    case 'l':
+                        commandPtr->hardlink = parser.validOption("link", cmdName);
                         break;
                     case 'n':   // no action, dry-run
                         std::cerr << "DryRun enabled\n";
@@ -407,13 +408,22 @@ int main(int argc, char* argv[]) {
 
         if (commandPtr->quiet < 2)
             std::cerr << Colors::colorize("_G_ +Levels=") << level
-            << " Dup=" << commandPtr->sameCnt
-            << " Diff=" << commandPtr->diffCnt
-            << " Miss=" << commandPtr->missCnt
-            << " Skip=" << commandPtr->skipCnt
-            << " Files=" << commandPtr->sameCnt + commandPtr->diffCnt + commandPtr->missCnt + commandPtr->skipCnt
-            << Colors::colorize("_X_\n");
+                << " Dup=" << commandPtr->sameCnt
+                << " Diff=" << commandPtr->diffCnt
+                << " Miss=" << commandPtr->missCnt
+                << " Skip=" << commandPtr->skipCnt
+                << " Files=" << commandPtr->sameCnt + commandPtr->diffCnt + commandPtr->missCnt + commandPtr->skipCnt
+                << Colors::colorize("_X_\n");
 
+        if (commandPtr->quiet < 2 && commandPtr->hardlink) {
+            DirUtil::LinkCnts linkCnts = DirUtil::getLinkCnts();
+            std::cerr << Colors::colorize(linkCnts.failed != 0 ? "_R_" : (linkCnts.completed != 0 ? "_G_" : "_Y_"))
+                << " +Links Completed=" << linkCnts.completed;
+            if (linkCnts.already != 0) std::cerr << " Already=" << linkCnts.already;
+            if (linkCnts.failed != 0) std::cerr << " Failed=" << linkCnts.failed;
+            std::cerr << Colors::colorize("_X_\n");
+        }
+            
         time_t endT;
         if (commandPtr->quiet < 2) {
             currentDateTime(endT);

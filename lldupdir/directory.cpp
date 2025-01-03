@@ -34,6 +34,12 @@
 #include <iostream>
 
 const char EXTN_CHAR = '.';
+const char* BACKUP_SUFFIX = "_tmp";
+
+static DirUtil::LinkCnts linkCnts;
+DirUtil::LinkCnts DirUtil::getLinkCnts() {
+    return linkCnts;
+}
 
 #ifdef HAVE_WIN
 #define byte win_byte_override  // Fix for c++ v17
@@ -157,7 +163,7 @@ const lstring& Directory_files::fullName(lstring& fname) const {
     return GetFullPath(fname);
 }
 
-#else
+#else   // else not windows below
 
 #include <unistd.h>
 #include <stdlib.h>
@@ -329,6 +335,69 @@ bool deleteFile(const char* path) {
 }
 */
 
+
+LinkStatus DirUtil::hardlink(bool dryRun, const char* masterPath, const char* linkPath) {
+    LinkStatus status = dryRun ? DRYRUN : FAIL_LINK;
+    
+    struct stat infoMaster;
+    struct stat infoLink;
+    bool statOk = (stat(masterPath, &infoMaster) == 0) && (stat(linkPath, &infoLink) == 0);
+            
+    if (statOk && infoMaster.st_ino == infoLink.st_ino) {
+        if (dryRun)
+            std::cerr << "Linked already: << " << masterPath << " " << linkPath << std::endl;
+        linkCnts.already++;
+        return ALREADY;
+    }
+    
+    if (!dryRun) {
+        lstring tmpName = linkPath;
+        tmpName += BACKUP_SUFFIX;
+        if (::rename(linkPath, tmpName) == 0) {
+            int statusCode = ::link(masterPath, linkPath);
+            if (statusCode == 0) {
+                if (infoMaster.st_mode != infoLink.st_mode)
+                    std::cerr << "Link caused permissions to changed from="
+                        << oct <<  infoLink.st_mode << " to " << oct << infoMaster.st_mode
+                        << " " << linkPath
+                        << std::endl;
+                if (infoMaster.st_uid != infoLink.st_uid)
+                    std::cerr << "Link caused user to change from="
+                        <<  infoLink.st_uid << " to " << infoMaster.st_uid
+                        << " " << linkPath
+                        << std::endl;
+                if (infoMaster.st_gid != infoLink.st_gid)
+                    std::cerr << "Link caused group to change from="
+                        <<  infoLink.st_uid << " to " << infoMaster.st_uid
+                        << " " << linkPath
+                        << std::endl;
+                statusCode = ::unlink(tmpName);
+                status = (statusCode == 0) ? DONE : FAIL_DEL_BACKUP;
+            } else {
+                int error = errno;
+                // std::cerr << "Hardlink error: << " << strerror(error) << " on " << masterPath << " " << linkPath << std::endl;
+                statusCode = ::rename(tmpName, linkPath);
+                status = FAIL_LINK;
+                errno = error;
+            }
+        } else {
+            // int error = errno;
+            // std::cerr << "Hardlink rename error: << " << strerror(error) << " on " << masterPath << " " << linkPath << std::endl;
+            status = FAIL_BACKUP;
+        }
+        
+        if (status == DONE)
+            linkCnts.completed++;
+        else
+            linkCnts.failed++;
+        
+    } else {
+        std::cerr << "Would link " << masterPath << " and " << linkPath << std::endl;
+    }
+    return status;
+}
+ 
+
 //-------------------------------------------------------------------------------------------------
 // [static] Set permission on relative path file and directories.
 bool DirUtil::setPermission(const char* relPath, unsigned permission, bool setAllParts) {
@@ -364,4 +433,32 @@ bool DirUtil::fileExists(const char* path) {
 #else
     return access(path, F_OK) == 0;
 #endif
+}
+
+//-------------------------------------------------------------------------------------------------
+void DirUtil::showLink(LinkStatus status, const char* masterPath, const char* linkPath) {
+    int error = errno;
+    switch (status) {
+        case DRYRUN:
+            std::cerr << "Would link:" << masterPath << " and " << linkPath << std::endl;
+            break;
+        case ALREADY:
+            std::cerr << "Already linked:" << masterPath << " and " << linkPath << std::endl;
+            break;
+        case DONE:
+            std::cerr << "Linked:" << masterPath << " and " << linkPath << std::endl;
+            break;
+        case FAIL_BACKUP:
+            std::cerr << "Link backup failed:" << strerror(error) << " on " << linkPath << std::endl;
+            break;
+        case FAIL_LINK:
+            std::cerr << "Link failed:" << strerror(error) << " on " << masterPath << " and " << linkPath << std::endl;
+            break;
+        case FAIL_RESTORE:
+            std::cerr << "Link restore failed:" << strerror(error) << " on " << linkPath << "_tmp\n";
+            break;
+        case FAIL_DEL_BACKUP:
+            std::cerr << "Link del backup failed: << " << strerror(error) << " on " << linkPath << "_tmp\n";
+            break;
+    }
 }

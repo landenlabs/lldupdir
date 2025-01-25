@@ -9,7 +9,7 @@
 // Author: Dennis Lang - 2024
 // https://landenlabs.com/
 //
-// This file is part of lldupdir project.
+//  
 //
 // ----- License ----
 //
@@ -35,6 +35,8 @@
 // 4291 - No matching operator delete found
 #pragma warning( disable : 4291 )
 #define _CRT_SECURE_NO_WARNINGS
+
+#define VERSION "v2.6"
 
 // Project files
 #include "ll_stdhdr.hpp"
@@ -88,7 +90,7 @@ static size_t InspectFiles(Command& command, const lstring& dirname) {
 
 // ---------------------------------------------------------------------------
 void showHelp(const char* arg0) {
-    const char* helpMsg = "  Dennis Lang v2.5 (landenlabs.com) " __DATE__ "\n\n"
+    const char* helpMsg = "  Dennis Lang " VERSION " (landenlabs.com) " __DATE__ "\n\n"
         "_p_Des: 'Find duplicate files by comparing length, hash value and optional name. \n"
         "_p_Use: lldupdir [options] directories...   or  files\n"
         "\n"
@@ -96,8 +98,8 @@ void showHelp(const char* arg0) {
         "\n"
         "\n"
         //    "   -invert           ; Invert test output "
-        "   -_y_includeFile=<filePattern>   ; -inc=*.java \n"
-        "   -_y_excludeFile=<filePattern>   ; -exc=*.bat -exe=*.exe \n"
+        "   -_y_includeItem=<filePattern>   ; -inc=*.java \n"
+        "   -_y_excludeItem=<filePattern>   ; -exc=*.bat -exc=dir1 \n"
         "   _p_Note: Capitalized _y_I_x_nclude/_y_E_x_xclude for full path pattern \n"
 #ifdef HAVE_WIN
         "   _p_Note: Escape directory slash on windows \n"
@@ -221,17 +223,17 @@ int main(int argc, char* argv[]) {
                         } else 
                             parser.validPattern(commandPtr->delDupPathPatList, value, "delDupPat", cmdName);
                         break;
-                    case 'e':   // -excludeFile=<patFile>
-                        parser.validPattern(commandPtr->excludeFilePatList, value, "excludeFile", cmdName);
+                    case 'e':   // -excludeItem=<patFile>
+                        parser.validPattern(commandPtr->excludeFilePatList, value, "excludeItem", cmdName);
                         break;
-                    case 'E':   // -ExcludeDir=<patPath>
-                        parser.validPattern(commandPtr->excludePathPatList, value, "ExcludeDir", cmdName);
+                    case 'E':   // -ExcludePath=<patPath>
+                        parser.validPattern(commandPtr->excludePathPatList, value, "ExcludePath", cmdName);
                         break;
-                    case 'i':   // -includeFile=<patFile>
-                        parser.validPattern(commandPtr->includeFilePatList, value, "includeFile", cmdName);
+                    case 'i':   // -includeItem=<patFile>
+                        parser.validPattern(commandPtr->includeFilePatList, value, "includeItem", cmdName);
                         break;
-                    case 'I':   // -IncludeDir=<patPath>
-                        parser.validPattern(commandPtr->includePathPatList, value, "includeDir", cmdName);
+                    case 'I':   // -IncludePath=<patPath>
+                        parser.validPattern(commandPtr->includePathPatList, value, "IncludePath", cmdName);
                         break;
                     case 'l':   // log=First|Second   def=Both
                         if (parser.validOption("log", cmd + 1)) {
@@ -278,9 +280,6 @@ int main(int argc, char* argv[]) {
                             commandPtr = &dupFiles.share(*commandPtr);
                         }
                         break;
-                    case '?':
-                        showHelp(argv[0]);
-                        return 0;
                     case 'h':
                         if (parser.validOption("help", cmdName, false)) {
                             showHelp(argv[0]);
@@ -344,7 +343,11 @@ int main(int argc, char* argv[]) {
                             commandPtr->verbose = true;
                         }
                         break;
-                            
+                    case '-':
+                        break;
+                    case '?':
+                        showHelp(argv[0]);
+                        return 0;
                     default:
                         parser.showUnknown(argStr);
                         break;

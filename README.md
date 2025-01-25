@@ -47,20 +47,26 @@ Default is provided by
 ### Help Banner:
 <pre>
 
-lldupdir  Dennis Lang v2.4 (landenlabs.com) Dec 22 2024
+lldupdir  Dennis Lang v2.6 (landenlabs.com) Jan 25 2025
 
 Des: 'Find duplicate files by comparing length, hash value and optional name.
 Use: lldupdir [options] directories...   or  files
 
 Options (only first unique characters required, options can be repeated):
 
-
-   -includeFile=&lt;filePattern>   ; -inc=*.java
-   -excludeFile=&lt;filePattern>   ; -exc=*.bat -exe=*.exe
+   -includeItem=&lt;filePattern>   ; -inc=*.java
+   -excludeItem=&lt;filePattern>   ; -exc=*.bat -exc=dir1
    Note: Capitalized I_x_nclude/E_x_xclude for full path pattern
    Note: Escape directory slash on windows
    -IncludePath=&lt;pathPattern>   ; -Inc=*\\code\\*.java
    -ExcludePath=&lt;pathPattern>   ; -Exc=*\\x64\\* -Exe=*\\build\\*
+
+   -regex                       ; Use regex pattern not DOS pattern
+   NOTE - Default DOS pattern converts * to .*, . to [.] and ? to .
+           If using -regex specify before pattern options
+   Example to ignore all dot directories and files:
+          -regex -exclude="[.].*"
+
    -verbose
    -quiet
 
@@ -81,6 +87,7 @@ Options (when scanning two directories, dup if names and hash match) :
    -log=[first|second]          ; Only show 1st or 2nd file for Dup or Diff
    -no                          ; DryRun, show delete but don't do delete
    -delete=[first|second|both]  ; If dup or diff, delete 1st, 2nd or both files
+   -link                        ; Hard link duplicates
    -threads                     ; Compute file hashes in threads
 
 Options (when comparing one dir or 3 or more directories)
@@ -95,7 +102,8 @@ Examples:
    lldupdir  dir1 dir2/subdir
    lldupdir  -showMiss -showDiff dir1 dir2/subdir
    lldupdir  -hideDup -showMiss -showDiff dir1 dir2/subdir
-   lldupdir -Exc=*\\.git\\* -exc=*.exe -exc=*.zip -hideDup -showMiss   dir1 dir2/subdir
+   lldupdir -Exc=*\\.git  -exc=*.exe -exc=*.zip -hideDup -showMiss   dir1 dir2/subdir
+   lldupdir -exc=.git -exc=.cs -exc=*.exe -exc=*.zip -hideDup -showMiss   dir1 dir2/subdir
 
   Find file matches by matching hash value, slower than above, 1 or three or more dirs
    lldupdir  -showAll  dir1

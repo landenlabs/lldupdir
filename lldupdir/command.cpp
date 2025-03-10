@@ -273,6 +273,8 @@ static struct stat  print(const lstring& path, struct stat* pInfo) {
 Command::Command(char c): code(c) {
     getcwd(CWD_BUF, sizeof(CWD_BUF));
     CWD_LEN = (unsigned)strlen(CWD_BUF);
+    if (CWD_LEN > 0 && CWD_BUF[CWD_LEN-1] == SLASH_CHAR)
+        CWD_LEN--;
     showAbsPath = false;
 }
 

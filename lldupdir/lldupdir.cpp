@@ -36,7 +36,7 @@
 #pragma warning( disable : 4291 )
 #define _CRT_SECURE_NO_WARNINGS
 
-#define VERSION "v2.6"
+#define VERSION "v2.7"
 
 // Project files
 #include "ll_stdhdr.hpp"
@@ -141,12 +141,12 @@ void showHelp(const char* arg0) {
         "   -_y_link                        ; Hard link duplicates \n"
         "   -_y_threads                     ; Compute file hashes in threads \n"
         "\n"
-        "_p_Options (when comparing one dir or 3 or more directories)\n"
+        "_p_Options when using -_y_all\n"
         "        Default compares all files for matching length and hash value\n"
-        "   -_y_justName                    ; Match duplicate name only, not contents \n"
+        "   -_y_all                         ; Find all matches by hash value, ignore name \n"
         "   -_y_ignoreExtn                  ; With -justName, also ignore extension \n"
-        "   -_y_all                         ; Find all matches, ignore name \n"
         "   -_y_delDupPat=pathPat           ; If dup   delete if pattern match \n"
+        "   -_y_justName                    ; Match name only, not contents \n"
 
         //        "   -ignoreHardlinks   ; \n"
         //        "   -ignoreSoftlinks    ; \n"
@@ -164,9 +164,14 @@ void showHelp(const char* arg0) {
         "   lldupdir -_y_exc=.git -_y_exc=\\*.exe -_y_hideDup -_y_showMiss   dir1 dir2/subdir  \n"
 #endif
         "\n"
-        "  Find file matches by matching hash value, slower than above, 1 or three or more dirs \n"
-        "   lldupdir  -_y_showAll  dir1 \n"
-        "   lldupdir  -_y_showAll  dir1   dir2/subdir   dir3 \n"
+        "  Find matches by matching hash value, slower than directory pairing (above) \n"
+        "   lldupdir  -_y_all  dir1 \n"
+        "   lldupdir  -_y_all  dir1   dir2/subdir   dir3 \n"
+#ifdef HAVE_WIN
+        "   lldupdir  -_y_all -_y_delDupPat=*\\\\dir3\\\\*  dir1   dir3 \n"
+#else
+        "   lldupdir  -_y_all -_y_delDupPat='*/dir3/*'  dir1   dir3 \n"
+#endif
         "\n"
         "  Change how output appears \n"
         "   lldupdir  -_y_sep=\" /  \"  dir1 dir2/subdir dir3\n"

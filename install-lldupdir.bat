@@ -17,6 +17,7 @@ set msbuild=F:\opt\VisualStudio\2022\Preview\MSBuild\Current\Bin\MSBuild.exe
 cd %prog%-ms
 @echo Clean %proj% 
 rmdir /s x64 2> nul
+rmdir /s %prog%\x64
 
 @echo.
 @echo Build release target
@@ -31,7 +32,7 @@ if not exist "%prog%-ms\x64\Release\%prog%.exe" (
 )
 
 @echo.
-@echo Copy Release to d:\opt\bin
+@echo Copy Release to %dstdir%
 :: dir %prog%-ms\x64\Release\%prog%.exe
 copy %prog%-ms\x64\Release\%prog%.exe %dstdir%\%prog%.exe
 
@@ -39,5 +40,9 @@ copy %prog%-ms\x64\Release\%prog%.exe %dstdir%\%prog%.exe
 @echo Compare md5 hash
 :: cmp -h %prog%-ms\x64\Release\%prog%.exe %dstdir%\%prog%.exe
 ld -a -ph %prog%-ms\x64\Release\%prog%.exe %dstdir%\%prog%.exe
+
+@rem play happy tone
+rundll32.exe cmdext.dll,MessageBeepStub
+@rem rundll32 user32.dll,MessageBeep
 
 :_end

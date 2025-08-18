@@ -469,12 +469,19 @@ bool DupFiles::end() {
                     lstring fullPath = pathList[plPos] + it->first;
                     HashValue hashValue = fileHash[fullPath];
                     bool isDup = (hashDups[hashValue] != 1);
+               
                     if (verbose) {
                         std::cout << (isDup ? preDup : preDiff) << fileHash[fullPath] << " ";
                         print(fullPath, NULL);
+                      
                         if (isDup) {
                             sameCnt++;
-                            if (ParseUtil::FileMatches(fullPath, delDupPathPatList, false)) {
+
+                            if (hardlink) {
+                                lstring fullPath2 = pathList[pathListIdx[plIdx]] + it->first;
+                                LinkStatus status = DirUtil::hardlink(dryRun, fullPath, fullPath2);
+                                DirUtil::showLink(status, fullPath, fullPath2);
+                            } else if (ParseUtil::FileMatches(fullPath, delDupPathPatList, false)) {
                                 DirUtil::deleteFile(dryRun, fullPath);
                             }
                         } else 
@@ -489,13 +496,20 @@ bool DupFiles::end() {
                         if (hashFileListIter->second.size() > 1) {
                             std::cout << preDivider;
                             const auto& matchList = hashFileListIter->second;
+                            lstring fullPath1;
                             for (unsigned mIdx = 0; mIdx < matchList.size(); mIdx++) {
-                                string fullPath = pathList[matchList[mIdx]] + it->first;
-                                if (mIdx != 0) std::cout << separator;
-                                std::cout << fullPath;
+                                lstring fullPath2 = pathList[matchList[mIdx]] + it->first;
+                                if (mIdx != 0)
+                                    std::cout << separator;
+                                else
+                                    fullPath1 = fullPath2;
+                                std::cout << fullPath2;
                                 sameCnt++;
-                                if (ParseUtil::FileMatches(fullPath, delDupPathPatList, false)) {
-                                    DirUtil::deleteFile(dryRun, fullPath.c_str());
+                                if (hardlink && mIdx > 0) {
+                                    LinkStatus status = DirUtil::hardlink(dryRun, fullPath1, fullPath2);
+                                    // DirUtil::showLink(status, fullPath1, fullPath2);
+                                } else if (ParseUtil::FileMatches(fullPath2, delDupPathPatList, false)) {
+                                    DirUtil::deleteFile(dryRun, fullPath2);
                                 }
                             }
                             std::cout << postDivider;
@@ -548,22 +562,30 @@ bool DupFiles::end() {
         // 3. Find duplicate hash
         for (auto hashFileListIter = hashFileList.cbegin(); hashFileListIter != hashFileList.cend(); hashFileListIter++) {
             if ((hashFileListIter->second.size() > 1) != invert) {
+                lstring fullPath1;
                 sameCnt += hashFileListIter->second.size() - 1;
                 if (showSame) std::cout << preDup;
                 const auto& matchList = hashFileListIter->second;
                 for (unsigned mIdx = 0; mIdx < matchList.size(); mIdx++) {
                     const PathParts& pathParts = *matchList[mIdx];
-                    lstring fullPath = pathList[pathParts.pathIdx];
-                    fullPath += pathParts.name;
+                    lstring fullPath2 = pathList[pathParts.pathIdx];
+                    fullPath2 += pathParts.name;
                     if (verbose) {
                         std::cout << matchList.size() << " Hash " << hashFileListIter->first << " ";
-                        print(fullPath, NULL);
+                        print(fullPath2, NULL);
                     } else if (showSame) {
                         if (mIdx != 0) std::cout << separator;
-                        std::cout << absOrRel(fullPath);
+                        std::cout << absOrRel(fullPath2);
                     }
-                    if (ParseUtil::FileMatches(fullPath, delDupPathPatList, false)) {
-                        DirUtil::deleteFile(dryRun, fullPath);
+                    if (hardlink) {
+                        if (mIdx == 0) {
+                            fullPath1 = fullPath2;
+                        } else {
+                            LinkStatus status = DirUtil::hardlink(dryRun, fullPath1, fullPath2);
+                            if (verbose) DirUtil::showLink(status, fullPath1, fullPath2);
+                        }
+                    } else if (ParseUtil::FileMatches(fullPath2, delDupPathPatList, false)) {
+                        DirUtil::deleteFile(dryRun, fullPath2);
                     }
                 }
                 if (showSame)std::cout << postDivider;

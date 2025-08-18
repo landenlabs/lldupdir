@@ -100,7 +100,7 @@ void showHelp(const char* arg0) {
         //    "   -invert           ; Invert test output "
         "   -_y_includeItem=<filePattern>   ; -inc=*.java \n"
         "   -_y_excludeItem=<filePattern>   ; -exc=*.bat -exc=dir1 \n"
-        "   _p_Note: Capitalized _y_I_x_nclude/_y_E_x_xclude for full path pattern \n"
+        "   _p_Note: Capitalized _Y_I_X_nclude/_Y_E_X_xclude for full path pattern \n"
 #ifdef HAVE_WIN
         "   _p_Note: Escape directory slash on windows \n"
         "   -_y_IncludePath=<pathPattern>   ; -Inc=*\\\\code\\\\*.java \n"
@@ -132,6 +132,7 @@ void showHelp(const char* arg0) {
         "   -_y_preMiss=<text>     ; Prefix before missing, default: \"--  \" \n"
         "   -_y_postDivider=<text> ; Divider for dup and diff, def: \"__\\n\"  \n"
         "   -_y_separator=<text>   ; Separator, def: \", \"  \n"
+        "   -_y_ignoreCase         ; Used with include/exclude patterns  \n"
         "\n"
         "_p_Options (when scanning two directories, dup if names and hash match) :\n"
         "   -_y_simple                      ; Show files no prefix or separators \n"
@@ -296,8 +297,12 @@ int main(int argc, char* argv[]) {
                     case 'i':
                         if (parser.validOption("invert", cmdName, false)) {
                             commandPtr->invert = true;
-                        } else if (parser.validOption("ignoreExtn", cmdName)) {
+                        } else if (parser.validOption("ignoreExtn", cmdName, false) || parser.validOption("ie", cmdName, false)) {
                             commandPtr->ignoreExtn = true;
+                        } else if (parser.validOption("ignoreCase", cmdName, false) || parser.validOption("ic", cmdName, false)) {
+                            parser.ignoreCase = true;
+                        } else {
+                            parser.reportError(cmdName, "invert or ignoreExtn or ignoreCase");
                         }
                         break;
                     case 'j':

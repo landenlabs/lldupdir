@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommandArguments> -inc=*.tax* -all -showabs   -delDupPat=2024-dlang  -no  taxes\  2024-dlang\</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-all  -showAll -link   C:\google-take-out-2023-03\thermo</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerWorkingDirectory>r:\</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerWorkingDirectory>c:\</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LocalDebuggerCommandArguments> -inc=*.tax* -all -showabs   -delDupPat=2024-dlang  -no  taxes\  2024-dlang\</LocalDebuggerCommandArguments>

@@ -76,10 +76,14 @@ bool ParseUtil::validOption(const char* validCmd, const char* possibleCmd, bool 
     }
 
     if (reportErr) {
-        std::cerr << Colors::colorize("_R_Unknown option:'") << possibleCmd << "', expect:'" << validCmd << Colors::colorize("'_X_\n");
-        optionErrCnt++;
+        reportError(possibleCmd, validCmd);
     }
     return false;
+}
+
+void ParseUtil::reportError(const char* userCmd, const char* expectMsg) {
+    std::cerr << Colors::colorize("_R_Unknown option:'") << userCmd << "', expect:'" << expectMsg << Colors::colorize("'_X_\n");
+    optionErrCnt++;
 }
 
 //-------------------------------------------------------------------------------------------------

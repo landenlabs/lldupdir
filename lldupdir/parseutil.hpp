@@ -54,6 +54,7 @@ public:
 
     std::regex getRegEx(const char* value);
 
+    void reportError(const char* userCmd, const char* message);
     bool validOption(const char* validCmd, const char* possibleCmd, bool reportErr = true);
     bool validPattern(PatternList& outList, lstring& value, const char* validCmd, const char* possibleCmd, bool reportErr = true);
  

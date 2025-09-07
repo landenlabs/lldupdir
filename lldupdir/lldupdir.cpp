@@ -36,7 +36,7 @@
 #pragma warning( disable : 4291 )
 #define _CRT_SECURE_NO_WARNINGS
 
-#define VERSION "v2.7"
+#define VERSION "v2.8"
 
 // Project files
 #include "ll_stdhdr.hpp"
@@ -146,7 +146,7 @@ void showHelp(const char* arg0) {
         "        Default compares all files for matching length and hash value\n"
         "   -_y_all                         ; Find all matches by hash value, ignore name \n"
         "   -_y_ignoreExtn                  ; With -justName, also ignore extension \n"
-        "   -_y_delDupPat=pathPat           ; If dup   delete if pattern match \n"
+        "   -_y_delDupPat=pathPat           ; If dup   delete if pattern match, use -showabs \n"
         "   -_y_justName                    ; Match name only, not contents \n"
 
         //        "   -ignoreHardlinks   ; \n"

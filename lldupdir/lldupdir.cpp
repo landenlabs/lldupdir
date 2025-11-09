@@ -36,7 +36,7 @@
 #pragma warning( disable : 4291 )
 #define _CRT_SECURE_NO_WARNINGS
 
-#define VERSION "v2.8"
+#define VERSION "v2.9"
 
 // Project files
 #include "ll_stdhdr.hpp"
@@ -172,6 +172,12 @@ void showHelp(const char* arg0) {
         "   lldupdir  -_y_all -_y_delDupPat=*\\\\dir3\\\\*  dir1   dir3 \n"
 #else
         "   lldupdir  -_y_all -_y_delDupPat='*/dir3/*'  dir1   dir3 \n"
+#endif
+   
+#ifdef HAVE_WIN
+        "   lldupdir -all -verbose . | findstr /R '^[0-9];' | sed -E 's/^[0-9]+;/del /' > deldup.bat"
+#else
+        "   lldupdir -all -verbose . | grep -E '^[0-9]+;' | sed -E 's/^[0-9]+;/rm /' > deldup.csh"
 #endif
         "\n"
         "  Change how output appears \n"

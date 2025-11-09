@@ -559,6 +559,7 @@ bool DupFiles::end() {
             }
         }
 
+        
         // 3. Find duplicate hash
         for (auto hashFileListIter = hashFileList.cbegin(); hashFileListIter != hashFileList.cend(); hashFileListIter++) {
             if ((hashFileListIter->second.size() > 1) != invert) {
@@ -571,8 +572,14 @@ bool DupFiles::end() {
                     lstring fullPath2 = pathList[pathParts.pathIdx];
                     fullPath2 += pathParts.name;
                     if (verbose) {
-                        std::cout << matchList.size() << " Hash " << hashFileListIter->first << " ";
-                        print(fullPath2, NULL);
+                        std::cout << std::endl;
+                        if (mIdx == matchList.size() - 1)
+                            std::cout << "last;";
+                        else
+                            std::cout << mIdx << ";";
+                        std::cout << absOrRel(fullPath2);
+                        // std::cout <<  matchList.size() << " Hash " << hashFileListIter->first << " ";
+                        // print(fullPath2, NULL);
                     } else if (showSame) {
                         if (mIdx != 0) std::cout << separator;
                         std::cout << absOrRel(fullPath2);
@@ -586,7 +593,7 @@ bool DupFiles::end() {
                         }
                     } else if (ParseUtil::FileMatches(fullPath2, delDupPathPatList, false)) {
                         DirUtil::deleteFile(dryRun, fullPath2);
-                    }
+                    } 
                 }
                 if (showSame)std::cout << postDivider;
             }

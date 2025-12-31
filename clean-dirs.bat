@@ -19,7 +19,7 @@ if "%1" == "show" (
 	lr -n -F=*.apk -F=*.aar -F=*.exe -F=*.obj -r . 
 )
 if "%1" == "clean" (
-	p -C=red -p="=== show directories and files to DELETE ===\n"
+	p -C=red -p="=== delete directories and files ===\n"
 	lr -q -P=.*\\build\\.* -r . 
 	lr -q -P=.*\\x64\\Debug\\.* -P=.*\\x64\\Release\\.* -r . 
 	lr -f -P=.*\\.vs\\.* -r . 

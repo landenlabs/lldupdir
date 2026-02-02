@@ -419,8 +419,9 @@ bool DupFiles::end() {
         }
 
         for (auto it = noExtnList.cbegin(); it != noExtnList.cend(); it++) {
-            if (it->second.size() > 1) {
-                sameCnt += it->second.size() - 1;
+            const string& fullname = *(it->second[0]);
+            if (it->second.size() > 1 || fileList[fullname].size() > 1) {
+                sameCnt += max(1, (int)it->second.size() - 1);
                 uint outCnt = 0;
                 for (auto itNames = it->second.cbegin(); itNames != it->second.cend(); itNames++) {
                     const IntList& pathListIdx = fileList[*(*itNames)];

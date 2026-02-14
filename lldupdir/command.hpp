@@ -80,6 +80,7 @@ public:
     bool useThreads = false;    // threads slower on physical disks
     bool dryRun = false;        // -n scan and report but do not delete or hardline. 
     bool showAbsPath = false;
+    bool showProgress = false;
 
     // -- Duplicate file
     bool showSame = true;

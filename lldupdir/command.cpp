@@ -174,7 +174,8 @@ bool RunCommand(const char* command, DWORD* pExitCode, int waitMsec) {
         DWORD err = GetLastError();
         if (pExitCode)
             *pExitCode = err;
-        std::cerr << "Failed " << tmpCommand << " " << GetErrorMsg(err) << std::endl;
+        Colors::showError("Failed ", tmpCommand.c_str(), " ", GetErrorMsg(err).c_str());
+        // std::cerr << "Failed " << tmpCommand << " " << GetErrorMsg(err) << std::endl;
         return false;
     }
 
@@ -248,7 +249,8 @@ static struct stat  print(const lstring& path, struct stat* pInfo) {
 #endif
         strftime(timeBuf, sizeof(timeBuf), "%a %d-%b-%Y %h:%M %p", &TM);
         if (err) {
-            std::cerr << "Invalid file " << path << std::endl;
+            Colors::showError("Invalid file ", path.c_str());
+            // std::cerr << "Invalid file " << path << std::endl;
         } else {
 #ifdef HAVE_WIN
             bool isSymLink = false;
@@ -290,16 +292,17 @@ bool Command::validFile(const lstring& name, const lstring& fullname) {
         skipCnt++;
         
         if (verbose) {
-            std::cerr << "Skipped:" << fullname;
+            const char* why = "";
             if (ParseUtil::FileMatches(name, excludeFilePatList, false))
-                cerr << " exclude";
+                why = " exclude";
             if (!ParseUtil::FileMatches(name, includeFilePatList, true))
-                cerr << " include";
+                why = " include";
             if (ParseUtil::FileMatches(fullname, excludePathPatList, false))
-                cerr << " Exclude";
+                why = " Exclude";
             if (!ParseUtil::FileMatches(fullname, includePathPatList, true))
-                cerr << " Include";
-            cerr << std::endl;
+                why = " Include";
+           
+            Colors::showError("Skipped:", fullname.c_str(), why);
         }
     }
     return isValid;

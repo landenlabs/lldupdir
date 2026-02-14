@@ -30,6 +30,7 @@
 
 #include "ll_stdhdr.hpp"
 #include "directory.hpp"
+#include "parseutil.hpp"    // Colors::showError(...)
 
 #include <iostream>
 
@@ -293,7 +294,8 @@ lstring& DirUtil::getExt(lstring& outExt, const lstring& inPath) {
 // [static] Delete file
 bool DirUtil::deleteFile(bool dryRun, const char* inPath) {
     if (dryRun) {
-        std::cerr << "\nWould delete " << inPath << std::endl;
+        Colors::showError("\nWould delete ", inPath);
+        // std::cerr << "\nWould delete " << inPath << std::endl;
         return true;
     }
 
@@ -307,7 +309,7 @@ bool DirUtil::deleteFile(bool dryRun, const char* inPath) {
     }
 
     if (err != 0)
-        std::cerr << endl << strerror(errno) << " Failed deleting " << inPath << std::endl;
+        Colors::showError("\n", strerror(errno), " Failed deleting ", inPath);
     else
         std::cerr << endl << "Deleted " << inPath << std::endl;
 
@@ -368,8 +370,10 @@ LinkStatus DirUtil::hardlink(bool dryRun, const char* masterPath, const char* li
     bool statOk = getFileInfo(masterPath, id1, links1) && getFileInfo(linkPath, id2, links2);
 
     if (statOk && links1 > 0 && id1 == id2) {
-        if (dryRun)
-            std::cerr << "Linked already: << " << masterPath << " " << linkPath << std::endl;
+        if (dryRun) {
+            Colors::showError("Linked already: << ", masterPath, " ", linkPath);
+            // std::cerr << "Linked already: << " << masterPath << " " << linkPath << std::endl;
+        }
         linkCnts.already++;
         return ALREADY;
     }
@@ -414,8 +418,10 @@ LinkStatus DirUtil::hardlink(bool dryRun, const char* masterPath, const char* li
     bool statOk = (stat(masterPath, &infoMaster) == 0) && (stat(linkPath, &infoLink) == 0);
             
     if (statOk && infoMaster.st_ino == infoLink.st_ino) {
-        if (dryRun)
-            std::cerr << "Linked already: << " << masterPath << " " << linkPath << std::endl;
+        if (dryRun) {
+            Colors::showError("Linked already: << ", masterPath, " ", linkPath);
+            // std::cerr << "Linked already: << " << masterPath << " " << linkPath << std::endl;
+        }
         linkCnts.already++;
         return ALREADY;
     }
@@ -513,22 +519,22 @@ void DirUtil::showLink(LinkStatus status, const char* masterPath, const char* li
             std::cerr << "Would link:" << masterPath << " and " << linkPath << std::endl;
             break;
         case ALREADY:
-            std::cerr << "Already linked:" << masterPath << " and " << linkPath << std::endl;
+            Colors::showError("Already linked:", masterPath, " and ", linkPath);
             break;
         case DONE:
             std::cerr << "Linked:" << masterPath << " and " << linkPath << std::endl;
             break;
         case FAIL_BACKUP:
-            std::cerr << "Link backup failed:" << strerror(error) << " on " << linkPath << std::endl;
+            Colors::showError("Link backup failed:", strerror(error), " on ", linkPath);
             break;
         case FAIL_LINK:
-            std::cerr << "Link failed:" << strerror(error) << " on " << masterPath << " and " << linkPath << std::endl;
+            Colors::showError("Link failed:", strerror(error), " on ", masterPath, " and ", linkPath);
             break;
         case FAIL_RESTORE:
-            std::cerr << "Link restore failed:" << strerror(error) << " on " << linkPath << "_tmp\n";
+            Colors::showError("Link restore failed:", strerror(error), " on ", linkPath);
             break;
         case FAIL_DEL_BACKUP:
-            std::cerr << "Link del backup failed: << " << strerror(error) << " on " << linkPath << "_tmp\n";
+            Colors::showError("Link del backup failed: ", strerror(error), " on ", linkPath);
             break;
     }
 }

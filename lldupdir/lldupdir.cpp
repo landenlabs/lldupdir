@@ -36,7 +36,7 @@
 #pragma warning( disable : 4291 )
 #define _CRT_SECURE_NO_WARNINGS
 
-#define VERSION "v2.9"
+#define VERSION "v2.14"
 
 // Project files
 #include "ll_stdhdr.hpp"
@@ -126,6 +126,7 @@ void showHelp(const char* arg0) {
         "   -_y_showMiss           ; Show missing files \n"
         "   -_y_hideDup            ; Don't show duplicate files  \n"
         "   -_y_showAbs            ; Show absolute file paths  \n"
+        "   -_y_showProgress       ; Show progress  \n"
 
         "   -_y_preDup=<text>      ; Prefix before duplicates, default nothing  \n"
         "   -_y_preDiff=<text>     ; Prefix before differences, default: \"!= \"  \n"
@@ -337,10 +338,12 @@ int main(int argc, char* argv[]) {
                             commandPtr->showAbsPath = true;
                         } else if (parser.validOption("sameName", cmdName, false)) {
                             commandPtr->sameName = true;
-                        } else if (parser.validOption("simple", cmdName)) {
+                        } else if (parser.validOption("simple", cmdName, false)) {
                             commandPtr->preDup = commandPtr->preDiff = "";
                             commandPtr->separator = " ";
                             commandPtr->postDivider = "\n";
+                        } else if (parser.validOption("showProgress", cmdName)) {
+                            commandPtr->showProgress = true;
                         }
                         break;
                     case 't':
@@ -416,6 +419,15 @@ int main(int argc, char* argv[]) {
                   
                     while (!Signals::aborted && dupScan.findDuplicates(level, extraDirList, nextDirList)) {
                         level++;
+                        if (commandPtr->showProgress) {
+                            std::cerr << Colors::colorize("_G_ +Levels=") << level
+                                << " Dup=" << commandPtr->sameCnt
+                                << " Diff=" << commandPtr->diffCnt
+                                << " Miss=" << commandPtr->missCnt
+                                << " Skip=" << commandPtr->skipCnt
+                                << " Files=" << commandPtr->sameCnt + commandPtr->diffCnt + commandPtr->missCnt + commandPtr->skipCnt
+                                << Colors::colorize("_X_\n");
+                        }
                     }
 
                     dupScan.done();

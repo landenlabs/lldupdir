@@ -35,6 +35,7 @@
 #include "dupscan.hpp"
 #include "directory.hpp"
 #include "hasher.hpp"
+#include "parseutil.hpp"    // Colors::showError(...)
 
 #include <assert.h>
 #include <iostream>
@@ -109,6 +110,7 @@ void DupScan::getFiles(unsigned level, const StringList& baseDirList, const Stri
     }
 }
 
+
 // ---------------------------------------------------------------------------
 void DupScan::getDirs(unsigned level, const StringList& baseDirList, const StringSet& nextDirList, StringSet& outDirList) const {
     lstring joinBuf;
@@ -117,6 +119,10 @@ void DupScan::getDirs(unsigned level, const StringList& baseDirList, const Strin
             Directory_files directory(DirUtil::join(joinBuf, baseDir, nextDir));
             lstring fullname;
 
+            if ( ! directory.begin() && level == 0) {
+                Colors::showError("Not a directory: ", baseDir.c_str());
+            }
+     
             while (!Signals::aborted && directory.more()) {
                 directory.fullName(fullname);
                 if (directory.is_directory() && command.validFile(directory.name(), fullname)) {

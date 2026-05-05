@@ -21,3 +21,4 @@ lib/
 *.lib
 *.aps
 *.user  # project.vcxproj.user
+*.vcxproj.user

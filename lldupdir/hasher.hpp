@@ -3,7 +3,7 @@
 //  lldupdir
 //
 //  Created by dennis.lang on 12/3/24.
-//  Copyright © 2024 Dennis Lang. All rights reserved.
+//  Copyright © 2026 Dennis Lang. All rights reserved.
 //
 
 #include "ll_stdhdr.hpp"

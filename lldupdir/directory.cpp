@@ -194,6 +194,24 @@ Directory_files::~Directory_files() {
 }
 
 //-------------------------------------------------------------------------------------------------
+void Directory_files::close() {
+    if (my_pDir != NULL) {
+        closedir(my_pDir);
+        my_pDir = NULL;
+    }
+    my_is_more = false;
+}
+
+//-------------------------------------------------------------------------------------------------
+bool Directory_files::begin() {
+    if (my_pDir == NULL)
+        return false;
+    rewinddir(my_pDir);
+    my_is_more = true;
+    return true;
+}
+
+//-------------------------------------------------------------------------------------------------
 bool Directory_files::more() {
     if (my_is_more) {
         my_pDirEnt = readdir(my_pDir);

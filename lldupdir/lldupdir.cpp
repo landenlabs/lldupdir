@@ -36,11 +36,7 @@
 #pragma warning( disable : 4291 )
 #define _CRT_SECURE_NO_WARNINGS
 
-<<<<<<< Updated upstream
-#define VERSION "v6.05.05"
-=======
 #define VERSION "v6.05.10"
->>>>>>> Stashed changes
 
 // Project files
 #include "ll_stdhdr.hpp"

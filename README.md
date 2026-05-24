@@ -2,7 +2,7 @@
   <tr>
     <td>
       <!-- VERSION -->v6.05.24<br>
-      $123-May-2026<br>
+      <!-- DATE -->24-May-2026<br>
       macOS<br>
       <a href="https://landenlabs.com">Home</a>
     </td>

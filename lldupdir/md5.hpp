@@ -2,7 +2,7 @@
 // File: md5.h    Author: Dennis Lang  Desc: Compute md5 hash of file contents
 //-------------------------------------------------------------------------------------------------
 //
-// Author: Dennis Lang - 2024
+// Author: Dennis Lang - 2026
 // https://landenlabs.com
 //
 //  

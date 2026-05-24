@@ -1,7 +1,7 @@
 ﻿<table border="0">
   <tr>
     <td>
-      <!-- VERSION -->v6.05.23<br>
+      <!-- VERSION -->v6.05.24<br>
       $123-May-2026<br>
       macOS<br>
       <a href="https://landenlabs.com">Home</a>
@@ -63,7 +63,7 @@ Default is provided by
 ### Help Banner:
 <pre>
 
-lldupdir  Dennis Lang v2.6 (landenlabs.com) Jan 25 2025
+lldupdir  Dennis Lang <!-- VERSION -->v6.05.24
 
 Des: 'Find duplicate files by comparing length, hash value and optional name.
 Use: lldupdir [options] directories...   or  files

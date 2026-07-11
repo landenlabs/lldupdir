@@ -20,26 +20,26 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\lldupdir\command.cpp" />
-    <ClCompile Include="..\lldupdir\directory.cpp" />
+    <ClCompile Include="..\llcommon\directory.cpp" />
     <ClCompile Include="..\lldupdir\dupscan.cpp" />
     <ClCompile Include="..\lldupdir\hash.cpp" />
     <ClCompile Include="..\lldupdir\hasher.cpp" />
     <ClCompile Include="..\lldupdir\lldupdir.cpp" />
     <ClCompile Include="..\lldupdir\md5.cpp" />
-    <ClCompile Include="..\lldupdir\parseutil.cpp" />
-    <ClCompile Include="..\lldupdir\signals.cpp" />
+    <ClCompile Include="..\llcommon\parseutil.cpp" />
+    <ClCompile Include="..\llcommon\signals.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\lldupdir\command.hpp" />
-    <ClInclude Include="..\lldupdir\directory.hpp" />
+    <ClInclude Include="..\llcommon\directory.hpp" />
     <ClInclude Include="..\lldupdir\dupscan.hpp" />
     <ClInclude Include="..\lldupdir\hash.hpp" />
     <ClInclude Include="..\lldupdir\hasher.hpp" />
-    <ClInclude Include="..\lldupdir\ll_stdhdr.hpp" />
-    <ClInclude Include="..\lldupdir\lstring.hpp" />
+    <ClInclude Include="..\llcommon\ll_stdhdr.hpp" />
+    <ClInclude Include="..\llcommon\lstring.hpp" />
     <ClInclude Include="..\lldupdir\md5.hpp" />
-    <ClInclude Include="..\lldupdir\parseutil.hpp" />
-    <ClInclude Include="..\lldupdir\signals.hpp" />
+    <ClInclude Include="..\llcommon\parseutil.hpp" />
+    <ClInclude Include="..\llcommon\signals.hpp" />
     <ClInclude Include="..\lldupdir\xxhash64.hpp" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
@@ -119,6 +119,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\llcommon;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -135,6 +136,7 @@
       <ConformanceMode>true</ConformanceMode>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>..\llcommon;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -151,6 +153,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\llcommon;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -171,6 +174,7 @@
       <ConformanceMode>true</ConformanceMode>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>..\llcommon;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

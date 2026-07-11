@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\lldupdir\directory.cpp">
+    <ClCompile Include="..\llcommon\directory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\lldupdir\lldupdir.cpp">
@@ -33,10 +33,10 @@
     <ClCompile Include="..\lldupdir\md5.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\lldupdir\parseutil.cpp">
+    <ClCompile Include="..\llcommon\parseutil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\lldupdir\signals.cpp">
+    <ClCompile Include="..\llcommon\signals.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\lldupdir\hasher.cpp">
@@ -44,13 +44,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\lldupdir\directory.hpp">
+    <ClInclude Include="..\llcommon\directory.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\lldupdir\ll_stdhdr.hpp">
+    <ClInclude Include="..\llcommon\ll_stdhdr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\lldupdir\lstring.hpp">
+    <ClInclude Include="..\llcommon\lstring.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\lldupdir\command.hpp">
@@ -68,10 +68,10 @@
     <ClInclude Include="..\lldupdir\xxhash64.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\lldupdir\parseutil.hpp">
+    <ClInclude Include="..\llcommon\parseutil.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\lldupdir\signals.hpp">
+    <ClInclude Include="..\llcommon\signals.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\lldupdir\hasher.hpp">

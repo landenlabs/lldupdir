@@ -482,17 +482,19 @@ bool DupFiles::end() {
                         if (isDup) {
                             sameCnt++;
 
-                            auto anchorIter = anchorByHash.find(hashValue);
-                            bool isAnchor = (anchorIter == anchorByHash.end());
-                            if (isAnchor) {
-                                anchorIter = anchorByHash.emplace(hashValue, fullPath).first;
-                            }
-
-                            if (hardlink && !isAnchor) {
-                                const lstring& anchorPath = anchorIter->second;
-                                LinkStatus status = DirUtil::hardlink(dryRun, anchorPath, fullPath);
-                                DirUtil::showLink(status, anchorPath, fullPath);
+                            if (hardlink) {
+                                // Wait to show the hardlink after a pair of paths is found. 
+                                auto anchorIter = anchorByHash.find(hashValue);
+                                if (anchorIter == anchorByHash.end()) {
+                                    anchorIter = anchorByHash.emplace(hashValue, fullPath).first;
+                                } else {
+                                    const lstring& anchorPath = anchorIter->second;
+                                    LinkStatus status = DirUtil::hardlink(dryRun, anchorPath, fullPath);
+                                    DirUtil::showLink(status, anchorPath, fullPath);
+                                }
                             } else if (ParseUtil::FileMatches(fullPath, delDupPathPatList, false)) {
+                                // delDupPathPat only applies when not hardlinking — otherwise it could
+                                // delete an anchor file that other dups still need to link against.
                                 DirUtil::deleteFile(dryRun, fullPath);
                             }
                         } else

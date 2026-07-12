@@ -108,10 +108,7 @@ void Hasher::findDupsAsync(Command& command, const StringList& baseDirList, cons
     anyFinishedGroups(command);
     while (threadCnt > MAX_THREADS || (threadCnt > 0 && (threadCnt + baseDirList.size()) > MAX_THREADS)) {
         // cerr << "Waiting, threadCnt=" << threadCnt << std::endl;
-        // Was: (void) lock1.try_lock_shared_for(std::chrono::seconds(1));
-        // That never actually waited (no code ever takes lock1's exclusive lock, so the
-        // shared try-lock always succeeds immediately) and leaked an unmatched shared-lock
-        // acquisition on every spin - a real sleep is both correct and lighter on the CPU.
+        // TODO - replace sleep with a std::condition_variable that doWork() toggles.
         std::this_thread::sleep_for(std::chrono::seconds(1));
         // cerr << "Resume, threadCnt=" << threadCnt << std::endl;
         // anyFinishedGroups(command);
@@ -131,7 +128,7 @@ void Hasher::waitForAsync(Command& command) {
     while (threadCnt > 0) {
         // std::cerr << "waiting for all threads to finish, cnt=" << threadCnt << std::endl;
         anyFinishedGroups(command);
-        if (threadCnt != 0)
+        if (threadCnt != 0)   // TODO - replace sleep with a std::condition_variable that doWork() toggles. 
             std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     // std::cerr << "Done using " << MAX_THREADS << " threads\n";

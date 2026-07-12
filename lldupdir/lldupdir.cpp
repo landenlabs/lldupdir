@@ -36,7 +36,7 @@
 #pragma warning( disable : 4291 )
 #define _CRT_SECURE_NO_WARNINGS
 
-#define VERSION "v6.05.25"
+#define VERSION "v6.07.10"
 
 // Project files
 #include "ll_stdhdr.hpp"

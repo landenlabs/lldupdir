@@ -4,6 +4,7 @@ git-notes.txt
 # Mac exclude
 .DS_Store
 /DerivedData
+.derived-data-log-*
 /*/project.xcworkspace/
 /*/xcuserdata/
 *.xcuserstate

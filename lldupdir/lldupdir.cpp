@@ -223,7 +223,7 @@ int main(int argc, char* argv[]) {
                     lstring value = cmdValue[1];
                     
                     if (cmd.length() > 1 && cmd[0] == '-')
-                        cmd.erase(0);   // allow -- prefix on commands
+                        cmd.erase(0, 1);   // allow -- prefix on commands
                     
                     const char* cmdName = cmd + 1;
                     switch (*cmdName) {

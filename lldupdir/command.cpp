@@ -310,13 +310,13 @@ bool Command::validFile(const lstring& name, const lstring& fullname) {
 
 // ---------------------------------------------------------------------------
 const char*  Command::absOrRel(const char* fullPath) const {
-    if (!showAbsPath && strncmp(fullPath, CWD_BUF, CWD_LEN) == 0)  
+    if (!showAbsPath && CWD_LEN > 0 && strncmp(fullPath, CWD_BUF, CWD_LEN) == 0)
         return fullPath + CWD_LEN + 1;
     else
         return fullPath;
 }
 const char*  Command::absOrRel(const string& fullPath) const {
-    if (!showAbsPath && strncmp(fullPath.c_str(), CWD_BUF, CWD_LEN) == 0)
+    if (!showAbsPath && CWD_LEN > 0 && strncmp(fullPath.c_str(), CWD_BUF, CWD_LEN) == 0)
         return fullPath.c_str() + CWD_LEN + 1;
     else
         return fullPath.c_str();
@@ -467,28 +467,35 @@ bool DupFiles::end() {
                 }
 
                 std::map<HashValue, std::vector<unsigned >> hashFileList;
+                std::map<HashValue, lstring> anchorByHash;  // first path seen per hash - what later dups link/point to
                 for (unsigned plIdx = 0; plIdx < pathListIdx.size(); plIdx++) {
                     // std::cout << pathList[pathListIdx[plIdx]] << it->first << std::endl;
                     unsigned plPos = pathListIdx[plIdx];
                     lstring fullPath = pathList[plPos] + it->first;
                     HashValue hashValue = fileHash[fullPath];
                     bool isDup = (hashDups[hashValue] != 1);
-               
+
                     if (verbose) {
                         std::cout << (isDup ? preDup : preDiff) << fileHash[fullPath] << " ";
                         print(fullPath, NULL);
-                      
+
                         if (isDup) {
                             sameCnt++;
 
-                            if (hardlink) {
-                                lstring fullPath2 = pathList[pathListIdx[plIdx]] + it->first;
-                                LinkStatus status = DirUtil::hardlink(dryRun, fullPath, fullPath2);
-                                DirUtil::showLink(status, fullPath, fullPath2);
+                            auto anchorIter = anchorByHash.find(hashValue);
+                            bool isAnchor = (anchorIter == anchorByHash.end());
+                            if (isAnchor) {
+                                anchorIter = anchorByHash.emplace(hashValue, fullPath).first;
+                            }
+
+                            if (hardlink && !isAnchor) {
+                                const lstring& anchorPath = anchorIter->second;
+                                LinkStatus status = DirUtil::hardlink(dryRun, anchorPath, fullPath);
+                                DirUtil::showLink(status, anchorPath, fullPath);
                             } else if (ParseUtil::FileMatches(fullPath, delDupPathPatList, false)) {
                                 DirUtil::deleteFile(dryRun, fullPath);
                             }
-                        } else 
+                        } else
                             diffCnt++;
                     } else if (isDup != invert) {
                         hashFileList[hashValue].push_back(plPos);

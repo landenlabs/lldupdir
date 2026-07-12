@@ -54,7 +54,11 @@ typedef unsigned int uint;  // required by xxhash64
 typedef unsigned int ThreadCnt;
 std::atomic<ThreadCnt> threadCnt(0);
 const ThreadCnt MAX_THREADS = 8;
-std::shared_timed_mutex  lock1;   // locked while thread count is increasing
+// Used purely as a counting mechanism, not for mutual exclusion: one shared lock is
+// taken per in-flight group (findDupsAsync) and released when that group finishes
+// (anyFinishedGroups) - never take an exclusive lock() on this, or every shared owner
+// above would then actually block, which isn't the intent here.
+std::shared_timed_mutex  lock1;
 
 // -----
 class ThreadJob  {
@@ -104,7 +108,11 @@ void Hasher::findDupsAsync(Command& command, const StringList& baseDirList, cons
     anyFinishedGroups(command);
     while (threadCnt > MAX_THREADS || (threadCnt > 0 && (threadCnt + baseDirList.size()) > MAX_THREADS)) {
         // cerr << "Waiting, threadCnt=" << threadCnt << std::endl;
-        (void) lock1.try_lock_shared_for(std::chrono::seconds(1));
+        // Was: (void) lock1.try_lock_shared_for(std::chrono::seconds(1));
+        // That never actually waited (no code ever takes lock1's exclusive lock, so the
+        // shared try-lock always succeeds immediately) and leaked an unmatched shared-lock
+        // acquisition on every spin - a real sleep is both correct and lighter on the CPU.
+        std::this_thread::sleep_for(std::chrono::seconds(1));
         // cerr << "Resume, threadCnt=" << threadCnt << std::endl;
         // anyFinishedGroups(command);
     }
@@ -123,8 +131,8 @@ void Hasher::waitForAsync(Command& command) {
     while (threadCnt > 0) {
         // std::cerr << "waiting for all threads to finish, cnt=" << threadCnt << std::endl;
         anyFinishedGroups(command);
-        if (threadCnt != 0) 
-            (void)lock1.try_lock_shared_for(std::chrono::seconds(1));
+        if (threadCnt != 0)
+            std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     // std::cerr << "Done using " << MAX_THREADS << " threads\n";
 }

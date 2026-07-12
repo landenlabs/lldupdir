@@ -44,7 +44,7 @@
 template <class TT>
 lstring& toString(lstring& buf, TT value) {
     buf.resize(buf.capacity());
-    int len = std::snprintf((char*)buf.c_str(), buf.capacity(), "%ul", (unsigned long)value);
+    int len = std::snprintf((char*)buf.c_str(), buf.capacity(), "%lu", (unsigned long)value);
     // buf.c_str[len] = '\0';
     buf.resize(len);
     return buf;
@@ -167,12 +167,15 @@ void DupScan::compareFiles(unsigned level, const StringList& baseDirList, const 
             showValue(joinBuf2, " len2=", fileLen2);
 
             if (command.justName) {
-                if (fileLen1 == fileLen2)
-                    command.showDuplicate(joinBuf1, joinBuf2);
-                else if (fileLen1 != -1 && fileLen2 != -1)
-                    command.showDifferent(joinBuf1, joinBuf2);
-                else
+                // Check the "missing" sentinel (-1) cases before the equality check below -
+                // otherwise two files that are BOTH missing compare equal (-1 == -1) and get
+                // misreported as duplicates instead of missing.
+                if (fileLen1 == -1 || fileLen2 == -1)
                     command.showMissing((fileLen1 != -1), joinBuf1, (fileLen2 != -1), joinBuf2);
+                else if (fileLen1 == fileLen2)
+                    command.showDuplicate(joinBuf1, joinBuf2);
+                else
+                    command.showDifferent(joinBuf1, joinBuf2);
             } else {
                 if (fileLen1 != fileLen2) {
                     matchingLen = false;  // currently only two items in baseDirList, so no need to exit early

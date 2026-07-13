@@ -17,6 +17,10 @@
 # lldupdir
 ### Find duplicate files and optionally delete them.
 
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE.txt)
+![Language](https://img.shields.io/badge/language-C%2B%2B17-blue.svg)
+![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-lightgrey.svg)
+
 ### Builds
 * OSX(M3)      Provided Xcode project
 * Windows/DOS  Provided Visual Studio solution
@@ -51,13 +55,18 @@ lldupdir -all -showAll dir1 dir2 dir3
 
 ### Dependencies and acknowledgements 
 
-The code contains two file hashing algorithms. 
-Default is provided by 
+The code contains two file hashing algorithms.
+Default is [xxHash64](http://cyan4973.github.io/xxHash/) (`xxhash64.hpp`), a fast
+non-cryptographic hash by Stephan Brumme, based on Yann Collet's xxHash design.
 <pre>
 // xxhash64.h
 // Copyright (c) 2016 Stephan Brumme. All rights reserved.
 // see http://create.stephan-brumme.com/disclaimer.html
 </pre>
+
+The alternate algorithm is a bundled MD5 implementation (`md5.cpp` / `md5.hpp`).
+
+* [llcommon](https://github.com/landenlabs/llcommon) - shared LanDen Labs utility library (git submodule)
 
 
 ### Help Banner:
@@ -128,4 +137,27 @@ Examples:
   Change how output appears
    lldupdir  -sep=" /  "  dir1 dir2/subdir dir3
 </pre>
+
+### License
+
+```
+Copyright 2026 Dennis Lang
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
+See [LICENSE.txt](LICENSE.txt) for the full license text.
+
+Note: the bundled `xxhash64.hpp` retains its original Stephan Brumme copyright
+notice per the acknowledgement above; it is not relicensed by this project's
+Apache 2.0 license.
+
 [Top](#top)

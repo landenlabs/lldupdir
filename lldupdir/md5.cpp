@@ -44,6 +44,10 @@
 #include <errno.h>
 #include <vector>
 
+#ifdef HAVE_WIN
+#include <windows.h>
+#endif
+
 typedef unsigned int uint;
 #ifndef HAVE_WIN
 typedef unsigned int DWORD;

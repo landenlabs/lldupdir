@@ -23,3 +23,6 @@ lib/
 *.aps
 *.user  # project.vcxproj.user
 *.vcxproj.user
+
+# Compiled objects
+*.o

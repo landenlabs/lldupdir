@@ -281,7 +281,9 @@ int main(int argc, char* argv[]) {
                     }
                 } else {
                     const char* cmdName = argStr + 1;
-                    switch (argStr[1]) {
+                    if (argStr.length() > 2 && *cmdName == '-')
+                        cmdName++;  // allow -- prefix on commands
+                    switch (*cmdName) {
                     case 'a':
                         if (parser.validOption("all", cmdName)) {
                             commandPtr->sameName = false;
